@@ -68,10 +68,19 @@ public class Product extends BaseEntity {
         this.description = description;
     }
 
-    @PrePersist
-    private void prePersist() {
-        if (StringUtils.hasText(name)) {
+    private void generateSlug() {
+        if (StringUtils.hasText(this.name)) {
             this.slug = SLUGIFY.slugify(this.name);
         }
+    }
+
+    @PrePersist
+    private void prePersist() {
+        generateSlug();
+    }
+
+    @PreUpdate
+    private void preUpdate() {
+        generateSlug();
     }
 }
