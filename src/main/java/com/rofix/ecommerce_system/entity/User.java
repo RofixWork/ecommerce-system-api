@@ -17,7 +17,7 @@ import java.util.Set;
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = {"username", "email"})})
 @Data
 @NoArgsConstructor
-@ToString(exclude = {"roles", "products", "orders"})
+@ToString(exclude = {"roles", "products", "orders", "reviews"})
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,6 +53,9 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+    private List<Review> reviews = new ArrayList<>();
 
     @PrePersist
     private void prePersist() {

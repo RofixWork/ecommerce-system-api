@@ -19,7 +19,7 @@ import java.util.List;
 @Table(name = "products")
 @Data
 @NoArgsConstructor
-@ToString(exclude = {"productImages", "cartItems", "orderItems"})
+@ToString(exclude = {"productImages", "cartItems", "orderItems", "reviews"})
 public class Product extends BaseEntity {
 
     private static final Slugify SLUGIFY;
@@ -64,6 +64,9 @@ public class Product extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "product")
     List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "product")
+    List<Review> reviews = new ArrayList<>();
 
     public Product(String name, String description, BigDecimal price, Integer stock, User createdBy, Category category) {
         this.name = name;
