@@ -6,16 +6,20 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.Check;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "products")
 @Data
 @NoArgsConstructor
+@ToString(exclude = {"productImages"})
 public class Product extends BaseEntity {
 
     private static final Slugify SLUGIFY;
@@ -51,6 +55,9 @@ public class Product extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "product")
+    private List<ProductImage> productImages = new ArrayList<>();
 
     public Product(String name, String description, BigDecimal price, Integer stock, User createdBy, Category category) {
         this.name = name;
