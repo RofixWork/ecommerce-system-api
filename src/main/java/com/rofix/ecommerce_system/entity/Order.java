@@ -6,16 +6,20 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "orders")
 @Data
 @NoArgsConstructor
+@ToString(callSuper = true, exclude = {"orderItems"})
 public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,10 +36,19 @@ public class Order extends BaseEntity {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "order")
+    List<OrderItem> orderItems = new ArrayList<>();
+
     @PrePersist
     private void prePersist() {
         if (this.status == null) {
             this.status = OrderStatus.NEW;
         }
+    }
+
+    public Order(OrderStatus status, User user, BigDecimal totalPrice) {
+        this.status = status;
+        this.user = user;
+        this.totalPrice = totalPrice;
     }
 }
