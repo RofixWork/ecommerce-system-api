@@ -12,7 +12,7 @@ import java.time.Instant;
 @Data
 public class BaseEntity {
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private Instant createdAt;
 
     @UpdateTimestamp
