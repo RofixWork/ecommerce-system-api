@@ -1,5 +1,6 @@
 package com.rofix.ecommerce_system.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;

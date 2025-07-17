@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -28,6 +30,14 @@ public class CategoryServiceImpl implements CategoryService {
         logger.info("Category created successfully");
 
         return modelMapper.map(savedCategory, CategoryResponseDTO.class);
+    }
+
+    @Override
+    public List<CategoryResponseDTO> findAll() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(category -> modelMapper.map(category, CategoryResponseDTO.class))
+                .toList();
     }
 
     private void categoryAlreadyExist(String name) {
