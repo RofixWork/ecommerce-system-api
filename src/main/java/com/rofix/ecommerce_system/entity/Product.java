@@ -33,12 +33,14 @@ public class Product extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 200)
     private String name;
 
     @Column(nullable = false, updatable = false, unique = true)
     private String slug;
 
+    @Lob
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -74,6 +76,14 @@ public class Product extends BaseEntity {
         this.price = price;
         this.stock = stock;
         this.createdBy = createdBy;
+        this.category = category;
+    }
+
+    public Product(String name, String description, BigDecimal price, Integer stock, Category category) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.stock = stock;
         this.category = category;
     }
 

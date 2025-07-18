@@ -4,8 +4,8 @@ import com.rofix.ecommerce_system.dto.request.CategoryRequestDTO;
 import com.rofix.ecommerce_system.dto.response.CategoryResponseDTO;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
-import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
+import com.rofix.ecommerce_system.utils.EntityHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,6 +21,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
     private final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
+    private final EntityHelper entityHelper;
 
     @Override
     public CategoryResponseDTO createCategory(CategoryRequestDTO categoryRequestDTO) {
@@ -44,13 +45,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponseDTO findBy(Long categoryId) {
-        Category category = getCategoryOrThrow(categoryId);
+        Category category = entityHelper.getCategoryOrThrow(categoryId);
         return modelMapper.map(category, CategoryResponseDTO.class);
     }
 
     @Override
     public String deleteCategory(Long categoryId) {
-        Category category = getCategoryOrThrow(categoryId);
+        Category category = entityHelper.getCategoryOrThrow(categoryId);
         categoryRepository.delete(category);
         logger.info("Successfully deleted category: {}", category.getName());
         return "Successfully deleted category: " + category.getName() + ".";
@@ -60,7 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryResponseDTO updateCategory(Long categoryId, CategoryRequestDTO categoryRequestDTO) {
         validateCategoryNameUniqueness(categoryRequestDTO.getName(), categoryId);
-        Category category = getCategoryOrThrow(categoryId);
+        Category category = entityHelper.getCategoryOrThrow(categoryId);
         category.setName(categoryRequestDTO.getName());
         category.setDescription(categoryRequestDTO.getDescription());
         categoryRepository.save(category);
@@ -77,15 +78,5 @@ public class CategoryServiceImpl implements CategoryService {
             logger.warn("Category '{}' already exists. Please choose a different one.", name);
             throw new ConflictException("Category '" + name + "' already exists. Please choose a different one.");
         }
-    }
-
-    private Category getCategoryOrThrow(Long categoryId) {
-        logger.info("Getting category with id {}", categoryId);
-        return categoryRepository.findById(categoryId).orElseThrow(
-                () -> {
-                    logger.info("Category not found with id {}", categoryId);
-                    return new NotFoundException("Sorry, that category doesn't exist.");
-                }
-        );
     }
 }
