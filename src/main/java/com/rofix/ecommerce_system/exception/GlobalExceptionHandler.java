@@ -1,12 +1,9 @@
 package com.rofix.ecommerce_system.exception;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.rofix.ecommerce_system.exception.base.*;
-import com.rofix.ecommerce_system.response.ApiResponse;
-import jakarta.validation.ConstraintViolationException;
+import com.rofix.ecommerce_system.response.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,44 +29,44 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
-    
+
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiResponse> handleNotFoundException(NotFoundException e) {
-        ApiResponse apiResponse = new ApiResponse(e.getMessage(), false);
+    public ResponseEntity<APIResponse> handleNotFoundException(NotFoundException e) {
+        APIResponse apiResponse = new APIResponse(e.getMessage(), false);
 
         return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ApiResponse> handleUnauthorizedException(UnauthorizedException e) {
-        ApiResponse apiResponse = new ApiResponse(e.getMessage(), false);
+    public ResponseEntity<APIResponse> handleUnauthorizedException(UnauthorizedException e) {
+        APIResponse apiResponse = new APIResponse(e.getMessage(), false);
 
         return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ApiResponse> handleConflictException(ConflictException e) {
-        ApiResponse apiResponse = new ApiResponse(e.getMessage(), false);
+    public ResponseEntity<APIResponse> handleConflictException(ConflictException e) {
+        APIResponse apiResponse = new APIResponse(e.getMessage(), false);
 
         return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiResponse> handleBadRequestException(BadRequestException e) {
-        ApiResponse apiResponse = new ApiResponse(e.getMessage(), false);
+    public ResponseEntity<APIResponse> handleBadRequestException(BadRequestException e) {
+        APIResponse apiResponse = new APIResponse(e.getMessage(), false);
 
         return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(APIException.class)
-    public ResponseEntity<ApiResponse> handleAPIException(APIException e) {
-        ApiResponse apiResponse = new ApiResponse(e.getMessage(), false);
+    public ResponseEntity<APIResponse> handleAPIException(APIException e) {
+        APIResponse apiResponse = new APIResponse(e.getMessage(), false);
 
         return ResponseEntity.status(e.getStatusCode()).body(apiResponse);
     }
 
 //    @ExceptionHandler(HttpMessageNotReadableException.class)
-//    public ResponseEntity<ApiResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
+//    public ResponseEntity<APIResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
 //    {
 //        String msg = "Invalid request format or data type error.";
 //
@@ -84,6 +81,6 @@ public class GlobalExceptionHandler {
 //            }
 //        }
 //
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(msg, false));
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new APIResponse(msg, false));
 //    }
 }
