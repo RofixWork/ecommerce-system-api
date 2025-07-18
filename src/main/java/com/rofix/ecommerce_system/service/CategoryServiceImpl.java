@@ -4,8 +4,10 @@ import com.rofix.ecommerce_system.dto.request.CategoryRequestDTO;
 import com.rofix.ecommerce_system.dto.response.CategoryResponseDTO;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
+import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
-import lombok.AllArgsConstructor;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
@@ -22,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryResponseDTO createCategory(CategoryRequestDTO categoryRequestDTO) {
-        categoryAlreadyExist(categoryRequestDTO.getName());
+        validateCategoryNameUniqueness(categoryRequestDTO.getName(), null);
 
         Category category = modelMapper.map(categoryRequestDTO, Category.class),
                 savedCategory = categoryRepository.save(category);
@@ -40,10 +42,50 @@ public class CategoryServiceImpl implements CategoryService {
                 .toList();
     }
 
-    private void categoryAlreadyExist(String name) {
-        if (categoryRepository.existsByNameIgnoreCase(name.trim().toLowerCase())) {
-            logger.warn("Category already exists with name {}", name);
+    @Override
+    public CategoryResponseDTO findBy(Long categoryId) {
+        Category category = getCategoryOrThrow(categoryId);
+        return modelMapper.map(category, CategoryResponseDTO.class);
+    }
+
+    @Override
+    public String deleteCategory(Long categoryId) {
+        Category category = getCategoryOrThrow(categoryId);
+        categoryRepository.delete(category);
+        logger.info("Successfully deleted category: {}", category.getName());
+        return "Successfully deleted category: " + category.getName() + ".";
+    }
+
+    @Transactional
+    @Override
+    public CategoryResponseDTO updateCategory(Long categoryId, CategoryRequestDTO categoryRequestDTO) {
+        validateCategoryNameUniqueness(categoryRequestDTO.getName(), categoryId);
+        Category category = getCategoryOrThrow(categoryId);
+        category.setName(categoryRequestDTO.getName());
+        category.setDescription(categoryRequestDTO.getDescription());
+        categoryRepository.save(category);
+        logger.info("Category with Id: {} updated successfully", categoryId);
+
+        return modelMapper.map(category, CategoryResponseDTO.class);
+    }
+
+    private void validateCategoryNameUniqueness(String name, Long categoryId) {
+        boolean exist = categoryId == null ?
+                categoryRepository.existsByNameIgnoreCase(name)
+                : categoryRepository.existsByNameIgnoreCaseAndIdNot(name, categoryId);
+        if (exist) {
+            logger.warn("Category '{}' already exists. Please choose a different one.", name);
             throw new ConflictException("Category '" + name + "' already exists. Please choose a different one.");
         }
+    }
+
+    private Category getCategoryOrThrow(Long categoryId) {
+        logger.info("Getting category with id {}", categoryId);
+        return categoryRepository.findById(categoryId).orElseThrow(
+                () -> {
+                    logger.info("Category not found with id {}", categoryId);
+                    return new NotFoundException("Sorry, that category doesn't exist.");
+                }
+        );
     }
 }
