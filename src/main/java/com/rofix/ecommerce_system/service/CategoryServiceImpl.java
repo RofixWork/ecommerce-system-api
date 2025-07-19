@@ -8,19 +8,18 @@ import com.rofix.ecommerce_system.repository.CategoryRepository;
 import com.rofix.ecommerce_system.utils.EntityHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
-    private final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
     private final EntityHelper entityHelper;
 
     @Override
@@ -30,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = modelMapper.map(categoryRequestDTO, Category.class),
                 savedCategory = categoryRepository.save(category);
 
-        logger.info("Category created successfully");
+        log.info("Category created successfully");
 
         return modelMapper.map(savedCategory, CategoryResponseDTO.class);
     }
@@ -53,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
     public String deleteCategory(Long categoryId) {
         Category category = entityHelper.getCategoryOrThrow(categoryId);
         categoryRepository.delete(category);
-        logger.info("Successfully deleted category: {}", category.getName());
+        log.info("Successfully deleted category: {}", category.getName());
         return "Successfully deleted category: " + category.getName() + ".";
     }
 
@@ -65,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(categoryRequestDTO.getName());
         category.setDescription(categoryRequestDTO.getDescription());
         categoryRepository.save(category);
-        logger.info("Category with Id: {} updated successfully", categoryId);
+        log.info("Category with Id: {} updated successfully", categoryId);
 
         return modelMapper.map(category, CategoryResponseDTO.class);
     }
@@ -75,7 +74,7 @@ public class CategoryServiceImpl implements CategoryService {
                 categoryRepository.existsByNameIgnoreCase(name)
                 : categoryRepository.existsByNameIgnoreCaseAndIdNot(name, categoryId);
         if (exist) {
-            logger.warn("Category '{}' already exists. Please choose a different one.", name);
+            log.warn("Category '{}' already exists. Please choose a different one.", name);
             throw new ConflictException("Category '" + name + "' already exists. Please choose a different one.");
         }
     }

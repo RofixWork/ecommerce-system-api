@@ -6,4 +6,8 @@ import jakarta.validation.Valid;
 
 public interface ProductService {
     ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO);
+
+    ProductResponseDTO getProduct(Long productId);
+
+    ProductResponseDTO getProductBySlug(String slug);
 }
