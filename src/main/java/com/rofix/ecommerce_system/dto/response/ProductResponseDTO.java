@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class ProductResponseDTO {
+    private Long id;
     private String name;
     private String slug;
     private String description;
