@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class ProductRequestDTO {
     @NotBlank(message = "Name cannot be blank!!!")
-    @Size(min = 10, max = 200, message = "Name at least between 30 and 200 chars ")
+    @Size(min = 10, max = 200, message = "Name at least between 10 and 200 chars ")
     private String name;
 
     @NotBlank(message = "Description cannot be blank!!!")
