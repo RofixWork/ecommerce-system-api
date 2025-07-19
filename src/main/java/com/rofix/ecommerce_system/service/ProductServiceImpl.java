@@ -142,23 +142,31 @@ public class ProductServiceImpl implements ProductService {
                 case "eq" -> productRepository.findByNameOrDescriptionAndPriceEquals(search, search, value, pageable);
                 case "gt" ->
                         productRepository.findByNameOrDescriptionAndPriceGreaterThan(search, search, value, pageable);
-                default -> productRepository.findByNameOrDescriptionAndPriceLessThan(search, search, value, pageable);
+                case "lt" -> productRepository.findByNameOrDescriptionAndPriceLessThan(search, search, value, pageable);
+                case "gte" ->
+                        productRepository.findByNameOrDescriptionAndPriceGreaterThanOrEqual(search, search, value, pageable);
+                case "lte" ->
+                        productRepository.findByNameOrDescriptionAndPriceLessThanOrEqual(search, search, value, pageable);
+                default -> productRepository.findByNameOrDescriptionAndPriceNotEqual(search, search, value, pageable);
             };
         }
 
         return switch (operator) {
             case "eq" -> productRepository.findByPriceEquals(value, pageable);
             case "gt" -> productRepository.findByPriceGreaterThan(value, pageable);
-            default -> productRepository.findByPriceLessThan(value, pageable);
+            case "lt" -> productRepository.findByPriceLessThan(value, pageable);
+            case "gte" -> productRepository.findByPriceGreaterThanEqual(value, pageable);
+            case "lte" -> productRepository.findByPriceLessThanEqual(value, pageable);
+            default -> productRepository.findByPriceNot(value, pageable);
         };
     }
 
     private static void checkPriceFormat(String price) {
-        Pattern pattern = Pattern.compile("^(eq|lt|gt):\\d{1,12}$", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("^(eq|lt|gt|neq|lte|gte):\\d{1,12}$", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(price);
 
         if (!matcher.find()) {
-            throw new BadRequestException("Invalid price format enter like (price=(lt|eq|gt):price)");
+            throw new BadRequestException("Invalid price format enter like (price=(eq|lt|gt|neq|lte|gte):price)");
         }
     }
 

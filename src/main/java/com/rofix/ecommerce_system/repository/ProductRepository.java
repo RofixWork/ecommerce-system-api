@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,6 +25,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByPriceLessThan(BigDecimal priceIsLessThan, Pageable pageable);
 
     Page<Product> findByPriceEquals(BigDecimal price, Pageable pageable);
+
+    Page<Product> findByPriceLessThanEqual(BigDecimal priceBigDecimal, Pageable pageable);
+
+    Page<Product> findByPriceGreaterThanEqual(BigDecimal priceIsGreaterThan, Pageable pageable);
+
+    Page<Product> findByPriceNot(BigDecimal price, Pageable pageable);
 
     //price and name
     @Query(
@@ -46,4 +53,25 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                     + " AND pr.price = :price"
     )
     Page<Product> findByNameOrDescriptionAndPriceEquals(String name, String description, BigDecimal price, Pageable pageable);
+
+    @Query(
+            "SELECT pr FROM Product as pr where " +
+                    "(LOWER(pr.name) LIKE CONCAT('%', LOWER(:name) ,'%') OR LOWER(pr.description) LIKE CONCAT('%', LOWER(:description) ,'%'))"
+                    + " AND pr.price >= :price"
+    )
+    Page<Product> findByNameOrDescriptionAndPriceGreaterThanOrEqual(@Param("name") String name, @Param("description") String description, @Param("price") BigDecimal price, Pageable pageable);
+
+    @Query(
+            "SELECT pr FROM Product as pr where " +
+                    "(LOWER(pr.name) LIKE CONCAT('%', LOWER(:name) ,'%') OR LOWER(pr.description) LIKE CONCAT('%', LOWER(:description) ,'%'))"
+                    + " AND pr.price <= :price"
+    )
+    Page<Product> findByNameOrDescriptionAndPriceLessThanOrEqual(@Param("name") String name, @Param("description") String description, @Param("price") BigDecimal price, Pageable pageable);
+
+    @Query(
+            "SELECT pr FROM Product as pr where " +
+                    "(LOWER(pr.name) LIKE CONCAT('%', LOWER(:name) ,'%') OR LOWER(pr.description) LIKE CONCAT('%', LOWER(:description) ,'%'))"
+                    + " AND pr.price != :price"
+    )
+    Page<Product> findByNameOrDescriptionAndPriceNotEqual(@Param("name") String name, @Param("description") String description, @Param("price") BigDecimal price, Pageable pageable);
 }
