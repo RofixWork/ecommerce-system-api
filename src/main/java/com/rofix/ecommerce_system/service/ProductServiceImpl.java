@@ -19,8 +19,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -56,40 +60,45 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageListResponse<ProductResponseDTO> getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public PageListResponse<ProductResponseDTO> getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String search, String price) {
 
         checkProductOrderField(sortBy);
-
         Pageable pageable = getPageable(pageNumber, pageSize, sortBy, sortOrder);
-        Page<Product> productPage = productRepository.findAll(pageable);
+
+        String cleanSearch = search != null ? search.trim() : null,
+                cleanPrice = price != null ? price.trim() : null;
+
+        //filters
+        Page<Product> productPage;
+
+        if (StringUtils.hasText(cleanPrice) && StringUtils.hasText(cleanSearch)) {
+            productPage = getPriceFilterOperator(cleanPrice, cleanSearch, pageable);
+        } else if (StringUtils.hasText(cleanPrice)) {
+            productPage = getPriceFilterOperator(cleanPrice, null, pageable);
+        } else if (StringUtils.hasText(cleanSearch)) {
+            productPage = productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(cleanSearch, cleanSearch, pageable);
+        } else {
+            productPage = productRepository.findAll(pageable);
+        }
+
         List<Product> productList = productPage.getContent();
 
-        List<ProductResponseDTO> getProductResponseDTOS = productList.stream()
+        List<ProductResponseDTO> productResponseDTOS = productList.stream()
                 .map(product -> modelMapper.map(product, ProductResponseDTO.class))
                 .toList();
 
+        boolean isEmpty = productPage.isEmpty();
         return new PageListResponse<>(
-                getProductResponseDTOS,
-                productPage.isEmpty() ? 0 : productPage.getSize(),
-                productPage.isEmpty() ? 0 : productPage.getNumber() + 1,
-                productPage.isEmpty() ? 0 : productPage.getTotalPages(),
-                productPage.isEmpty() ? 0 : productPage.getTotalElements(),
+                productResponseDTOS,
+                isEmpty ? 0 : productPage.getSize(),
+                isEmpty ? 0 : productPage.getNumber() + 1,
+                isEmpty ? 0 : productPage.getTotalPages(),
+                isEmpty ? 0 : productPage.getTotalElements(),
                 productPage.isLast()
         );
     }
 
-    private static void checkProductOrderField(String sortBy) {
-        if (!AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS.contains(sortBy)) {
-            log.error("Invalid sort field entered. Here are the fields you can use: {}", AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
-            throw new BadRequestException("Invalid sort field entered. Here are the fields you can use: " + AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
-        }
-    }
-
-    private Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        return PageRequest.of(pageNumber - 1, pageSize, sort);
-    }
-
+    //------------------HELPERS---------------
     private Product getSavedProduct(ProductRequestDTO productRequestDTO, Category category) {
         Product product = new Product(
                 productRequestDTO.getName(),
@@ -117,5 +126,51 @@ public class ProductServiceImpl implements ProductService {
                     return new NotFoundException("Sorry, that product doesn't exist.");
                 }
         );
+    }
+
+    private Page<Product> getPriceFilterOperator(String price, String search, Pageable pageable) {
+
+        checkPriceFormat(price);
+
+        String[] priceFilter = price.split(":");
+        String operator = priceFilter[0].trim().toLowerCase();
+        BigDecimal value = new BigDecimal(priceFilter[1]);
+
+        if (StringUtils.hasText(search) && StringUtils.hasText(price)) {
+
+            return switch (operator) {
+                case "eq" -> productRepository.findByNameOrDescriptionAndPriceEquals(search, search, value, pageable);
+                case "gt" ->
+                        productRepository.findByNameOrDescriptionAndPriceGreaterThan(search, search, value, pageable);
+                default -> productRepository.findByNameOrDescriptionAndPriceLessThan(search, search, value, pageable);
+            };
+        }
+
+        return switch (operator) {
+            case "eq" -> productRepository.findByPriceEquals(value, pageable);
+            case "gt" -> productRepository.findByPriceGreaterThan(value, pageable);
+            default -> productRepository.findByPriceLessThan(value, pageable);
+        };
+    }
+
+    private static void checkPriceFormat(String price) {
+        Pattern pattern = Pattern.compile("^(eq|lt|gt):\\d{1,12}$", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(price);
+
+        if (!matcher.find()) {
+            throw new BadRequestException("Invalid price format enter like (price=(lt|eq|gt):price)");
+        }
+    }
+
+    private static void checkProductOrderField(String sortBy) {
+        if (!AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS.contains(sortBy.trim().toLowerCase())) {
+            log.error("Invalid sort field entered. Here are the fields you can use: {}", AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
+            throw new BadRequestException("Invalid sort field entered. Here are the fields you can use: " + AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
+        }
+    }
+
+    private Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        return PageRequest.of(pageNumber - 1, pageSize, sort);
     }
 }

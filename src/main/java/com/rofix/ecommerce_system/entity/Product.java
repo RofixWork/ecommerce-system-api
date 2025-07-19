@@ -39,8 +39,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false, updatable = false, unique = true)
     private String slug;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 4000)
     private String description;
 
     @Column(nullable = false, precision = 12, scale = 2)
