@@ -5,12 +5,15 @@ import com.rofix.ecommerce_system.dto.request.ProductRequestDTO;
 import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Product;
+import com.rofix.ecommerce_system.entity.ProductImage;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
+import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.utils.EntityHelper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -33,12 +36,12 @@ public class ProductServiceImpl implements ProductService {
     private final EntityHelper entityHelper;
     private final ModelMapper modelMapper;
     private final ProductRepository productRepository;
-
+    private final ProductImageService productImageService;
 
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
 
-        productNameAlreadyExist(productRequestDTO.getName());
+        productNameAlreadyExist(productRequestDTO.getName(), null);
 
         Category category = entityHelper.getCategoryOrThrow(productRequestDTO.getCategoryId());
 
@@ -100,6 +103,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO) {
+        productNameAlreadyExist(productRequestDTO.getName(), productId);
+
         Product product = entityHelper.getProductOrThrow(productId);
         Category category = entityHelper.getCategoryOrThrow(productRequestDTO.getCategoryId());
 
@@ -115,6 +120,27 @@ public class ProductServiceImpl implements ProductService {
         return modelMapper.map(product, ProductResponseDTO.class);
     }
 
+    @Transactional
+    @Override
+    public String deleteProduct(Long productId) {
+        Product product = entityHelper.getProductOrThrow(productId);
+        List<ProductImage> productImages = product.getProductImages();
+
+        //no images
+        if (productImages == null || productImages.isEmpty()) {
+            productRepository.delete(product);
+            log.info("Deleted product '{}' from image repository", product.getName());
+            return "Product has been deleted successfully";
+        }
+
+        for (ProductImage productImage : productImages) {
+            productImageService.deleteImageProduct(productId, productImage.getId());
+        }
+        productRepository.delete(product);
+        log.info("Deleted product '{}' and all its images", product.getName());
+        return "Product has been deleted successfully";
+    }
+
     //------------------HELPERS---------------
     private Product getSavedProduct(ProductRequestDTO productRequestDTO, Category category) {
         Product product = new Product(
@@ -128,8 +154,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    private void productNameAlreadyExist(String name) {
-        if (productRepository.existsByNameIgnoreCase(name.trim().toLowerCase())) {
+    private void productNameAlreadyExist(String name, Long productId) {
+        boolean checkProductName = productId == null ?
+                productRepository.existsByNameIgnoreCase(name.trim().toLowerCase())
+                : productRepository.existsByNameIgnoreCaseAndIdNot(name.trim().toLowerCase(), productId);
+        if (checkProductName) {
             log.warn("Product Name '{}' already exists. Please choose a different one.", name);
             throw new ConflictException("Product '" + name + "' already exists. Please choose a different one.");
         }

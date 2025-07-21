@@ -3,6 +3,7 @@ package com.rofix.ecommerce_system.service;
 import com.rofix.ecommerce_system.dto.request.ProductRequestDTO;
 import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.response.PageListResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
@@ -16,4 +17,7 @@ public interface ProductService {
     PageListResponse<ProductResponseDTO> getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String search, String price);
 
     ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO);
+
+    @Transactional
+    String deleteProduct(Long productId);
 }

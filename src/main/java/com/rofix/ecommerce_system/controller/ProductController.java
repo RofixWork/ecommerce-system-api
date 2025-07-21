@@ -4,6 +4,7 @@ import com.rofix.ecommerce_system.config.AppConstants;
 import com.rofix.ecommerce_system.dto.request.ProductRequestDTO;
 import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.entity.Product;
+import com.rofix.ecommerce_system.response.APIResponse;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.service.ProductService;
 import jakarta.validation.Valid;
@@ -66,5 +67,12 @@ public class ProductController {
             @Valid @RequestBody ProductRequestDTO productRequestDTO
     ) {
         return ResponseEntity.ok(productService.updateProduct(productId, productRequestDTO));
+    }
+
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<APIResponse> deleteProduct(
+            @Min(value = 1) @PathVariable Long productId
+    ) {
+        return ResponseEntity.ok(new APIResponse(productService.deleteProduct(productId), true));
     }
 }
