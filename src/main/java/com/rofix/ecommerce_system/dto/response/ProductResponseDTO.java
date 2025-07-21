@@ -16,4 +16,5 @@ public class ProductResponseDTO {
     private BigDecimal price;
     private Integer stock;
     private CategoryResponseDTO category;
+    private List<ProductImageResponseDTO> images;
 }
