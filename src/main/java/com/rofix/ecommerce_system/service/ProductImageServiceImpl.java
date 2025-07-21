@@ -1,0 +1,74 @@
+package com.rofix.ecommerce_system.service;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.rofix.ecommerce_system.config.AppConstants;
+import com.rofix.ecommerce_system.dto.response.ProductImageResponseDTO;
+import com.rofix.ecommerce_system.entity.Product;
+import com.rofix.ecommerce_system.entity.ProductImage;
+import com.rofix.ecommerce_system.exception.base.BadRequestException;
+import com.rofix.ecommerce_system.repository.ProductImageRepository;
+import com.rofix.ecommerce_system.repository.ProductRepository;
+import com.rofix.ecommerce_system.utils.EntityHelper;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class ProductImageServiceImpl implements ProductImageService {
+    private final EntityHelper entityHelper;
+    private final Cloudinary cloudinary;
+    private final ProductImageRepository productImageRepository;
+    private final ModelMapper modelMapper;
+
+    @Override
+    public ProductImageResponseDTO uploadProductImage(Long productId, MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new BadRequestException("The uploaded file is empty");
+        }
+
+        checkFileExtension(file);
+
+        Product product = entityHelper.getProductOrThrow(productId);
+        //upload
+        Map<?, ?> uploadFile;
+        try {
+            Map<?, ?> infos = ObjectUtils.asMap("resource_type", "image",
+                    "public_id", UUID.randomUUID().toString(),
+                    "folder", AppConstants.CLOUDINARY_PRODUCTS_FOLDER,
+                    "overwrite", true);
+            uploadFile = cloudinary.uploader().upload(file.getBytes(), infos);
+            log.info("Product image uploaded successfully: {}", uploadFile.get("secure_url"));
+
+        } catch (IOException ex) {
+            log.error("Failed Upload Product Image");
+            throw new BadRequestException("Failed Upload Product Image");
+        }
+        log.info("Upload Product Image File Name: {}", uploadFile.get("secure_url"));
+
+        ProductImage productImage = new ProductImage();
+        productImage.setUrl((String) uploadFile.get("secure_url"));
+        productImage.setProduct(product);
+        ProductImage savedProductImage = productImageRepository.save(productImage);
+
+        log.info("Product Image Saved in DB: {}", savedProductImage);
+
+        return modelMapper.map(savedProductImage, ProductImageResponseDTO.class);
+    }
+
+    private static void checkFileExtension(MultipartFile file) {
+        if (!file.isEmpty() && !AppConstants.ALLOWED_FILE_MIME_TYPES.contains(file.getContentType())) {
+            log.error("The uploaded file is not a valid image. Accepted types are: {}", AppConstants.ALLOWED_FILE_MIME_TYPES);
+            throw new BadRequestException("The uploaded file is not a valid image. Accepted types are: " + AppConstants.ALLOWED_FILE_MIME_TYPES);
+        }
+    }
+}
