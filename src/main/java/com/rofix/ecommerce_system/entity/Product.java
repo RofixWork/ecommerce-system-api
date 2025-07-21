@@ -36,7 +36,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false, unique = true, length = 200)
     private String name;
 
-    @Column(nullable = false, updatable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String slug;
 
     @Column(nullable = false, length = 4000)
@@ -94,14 +94,14 @@ public class Product extends BaseEntity {
     }
 
     private void generateSlug() {
-        if (StringUtils.hasText(this.name)) {
-            this.slug = SLUGIFY.slugify(this.name);
-        }
+        this.slug = SLUGIFY.slugify(this.name);
     }
 
     @PrePersist
     private void prePersist() {
-        generateSlug();
+        if (StringUtils.hasText(this.name)) {
+            generateSlug();
+        }
     }
 
     @PreUpdate

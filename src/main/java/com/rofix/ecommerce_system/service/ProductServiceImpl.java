@@ -98,6 +98,23 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
+    @Override
+    public ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO) {
+        Product product = entityHelper.getProductOrThrow(productId);
+        Category category = entityHelper.getCategoryOrThrow(productRequestDTO.getCategoryId());
+
+        //update
+        product.setName(productRequestDTO.getName());
+        product.setDescription(productRequestDTO.getDescription());
+        product.setPrice(productRequestDTO.getPrice());
+        product.setCategory(category);
+        product.setStock(productRequestDTO.getStock());
+
+        product = productRepository.save(product);
+
+        return modelMapper.map(product, ProductResponseDTO.class);
+    }
+
     //------------------HELPERS---------------
     private Product getSavedProduct(ProductRequestDTO productRequestDTO, Category category) {
         Product product = new Product(

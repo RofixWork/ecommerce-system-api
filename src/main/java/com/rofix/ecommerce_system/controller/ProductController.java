@@ -7,7 +7,6 @@ import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.service.ProductService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -59,5 +58,13 @@ public class ProductController {
             @PathVariable String slug
     ) {
         return ResponseEntity.ok(productService.getProductBySlug(slug));
+    }
+
+    @PutMapping("/products/{productId}")
+    public ResponseEntity<ProductResponseDTO> updateProduct(
+            @Min(value = 1) @PathVariable Long productId,
+            @Valid @RequestBody ProductRequestDTO productRequestDTO
+    ) {
+        return ResponseEntity.ok(productService.updateProduct(productId, productRequestDTO));
     }
 }
