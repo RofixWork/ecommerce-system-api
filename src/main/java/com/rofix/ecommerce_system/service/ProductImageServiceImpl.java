@@ -7,6 +7,7 @@ import com.rofix.ecommerce_system.dto.response.ProductImageResponseDTO;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.ProductImage;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
+import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import com.rofix.ecommerce_system.utils.EntityHelper;
@@ -58,17 +59,38 @@ public class ProductImageServiceImpl implements ProductImageService {
         ProductImage productImage = new ProductImage();
         productImage.setUrl((String) uploadFile.get("secure_url"));
         productImage.setProduct(product);
+        productImage.setPublicId((String) uploadFile.get("public_id"));
         ProductImage savedProductImage = productImageRepository.save(productImage);
 
-        log.info("Product Image Saved in DB: {}", savedProductImage);
+        log.info("Product Image Saved in DB: {}", savedProductImage.getUrl());
 
         return modelMapper.map(savedProductImage, ProductImageResponseDTO.class);
     }
 
+    @Override
+    public String deleteImageProduct(Long productId, Long productImageId) {
+        Product product = entityHelper.getProductOrThrow(productId);
+        ProductImage productImage = entityHelper.getProductImageOrThrow(productImageId);
+        try {
+            Map<?, ?> infos = ObjectUtils.asMap("invalidate", true);
+            Map<?, ?> result = cloudinary.uploader().destroy(productImage.getPublicId(), infos);
+            log.info("Result {}", result);
+            log.info("Product Image Deleted From Cloudinary...");
+        } catch (IOException ex) {
+            log.error("Failed Delete Product Image From Cloudinary");
+            throw new BadRequestException("Failed Delete Product Image");
+        }
+        productImageRepository.delete(productImage);
+        log.info("Product Image Deleted Successfully");
+        return "Image for product " + product.getId() + " deleted successfully.";
+    }
+
+    //    ================== HELPERS ==========================
     private static void checkFileExtension(MultipartFile file) {
         if (!file.isEmpty() && !AppConstants.ALLOWED_FILE_MIME_TYPES.contains(file.getContentType())) {
             log.error("The uploaded file is not a valid image. Accepted types are: {}", AppConstants.ALLOWED_FILE_MIME_TYPES);
             throw new BadRequestException("The uploaded file is not a valid image. Accepted types are: " + AppConstants.ALLOWED_FILE_MIME_TYPES);
         }
     }
+
 }

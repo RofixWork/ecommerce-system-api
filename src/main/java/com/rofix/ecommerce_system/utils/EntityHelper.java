@@ -2,14 +2,13 @@ package com.rofix.ecommerce_system.utils;
 
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Product;
+import com.rofix.ecommerce_system.entity.ProductImage;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
+import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class EntityHelper {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
 
     public Category getCategoryOrThrow(Long categoryId) {
         log.info("Getting category with id {}", categoryId);
@@ -37,5 +37,12 @@ public class EntityHelper {
                     return new NotFoundException("Sorry, that product doesn't exist.");
                 }
         );
+    }
+
+    public ProductImage getProductImageOrThrow(Long productImageId) {
+        return productImageRepository.findById(productImageId).orElseThrow(() -> {
+            log.info("Product not found with id {}", productImageId);
+            return new NotFoundException("Sorry, that Product Image doesn't exist.");
+        });
     }
 }
