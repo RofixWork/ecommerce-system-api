@@ -9,7 +9,6 @@ import com.rofix.ecommerce_system.entity.ProductImage;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
-import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.utils.EntityHelper;

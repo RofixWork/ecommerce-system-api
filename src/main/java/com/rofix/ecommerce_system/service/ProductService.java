@@ -4,8 +4,6 @@ import com.rofix.ecommerce_system.dto.request.ProductRequestDTO;
 import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 
 public interface ProductService {
     ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO);
