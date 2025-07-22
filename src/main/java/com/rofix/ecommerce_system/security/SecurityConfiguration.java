@@ -50,7 +50,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/h2-console/**").permitAll()
                                 .requestMatchers(WHITE_LIST_URL).permitAll()
                                 .requestMatchers("/api/auth/login").permitAll()
-                                .requestMatchers("/api/auth/logout").permitAll()
+                                .requestMatchers("/api/auth/register").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .headers((headers) -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))

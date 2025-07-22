@@ -9,31 +9,23 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class RegisterRequest {
-    @NotBlank
-    @Size(min = 3, max = 20)
-    private String firstName;
-
-    @NotBlank
-    @Size(min = 3, max = 20)
-    private String lastName;
-
-    @NotBlank
-    @Size(min = 3, max = 20)
+    @NotBlank(message = "Username is required.")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters.")
     private String username;
 
-    @Email
+    @NotBlank(message = "Email is required.")
+    @Email(message = "Please enter a valid email address.")
     private String email;
 
-    @NotBlank(message = "Phone Number cannot be blank!!!")
-    @Pattern(regexp = "^\\+?[\\d\\s\\-\\(\\)]{7,20}$", message = "Phone number must be valid format")
-    @Size(max = 15)
+    @NotBlank(message = "Phone number is required.")
+    @Pattern(regexp = "^\\+?[\\d\\s\\-\\(\\)]{7,20}$", message = "Phone number must be in a valid format (e.g., +1234567890).")
+    @Size(max = 20, message = "Phone number cannot exceed 20 characters.")
     private String phone;
 
-    @NotBlank
-    @Size(min = 3, max = 40)
+    @NotBlank(message = "Password is required.")
+    @Size(min = 8, max = 40, message = "Password must be between 8 and 40 characters.")
     private String password;
 
-    @NotEmpty(message = "At least one Role must be added!")
-    private Set<String> roles;
-
+    //    @NotEmpty(message = "At least one role must be selected.")
+    private Set<@Pattern(regexp = "(?i)^(CUSTOMER|SELLER)$", message = "Invalid role value. Allowed roles are CUSTOMER, SELLER.") String> roles;
 }

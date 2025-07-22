@@ -1,7 +1,10 @@
 package com.rofix.ecommerce_system.config;
 
 import com.rofix.ecommerce_system.entity.Category;
+import com.rofix.ecommerce_system.entity.Role;
+import com.rofix.ecommerce_system.enums.RoleName;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
+import com.rofix.ecommerce_system.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class DataInitializer implements CommandLineRunner {
             "Watches"
     ));
     private final CategoryRepository categoryRepository;
+    private final RoleRepository roleRepository;
 
 
     @Override
@@ -50,5 +55,16 @@ public class DataInitializer implements CommandLineRunner {
         }
         categoryRepository.saveAll(categories);
         log.info("Categories Saved in the DB...");
+
+//        --------------------------- roles ---------------------------
+        Set<Role> roles = Set.of(
+                new Role(RoleName.ADMIN),
+                new Role(RoleName.CUSTOMER),
+                new Role(RoleName.SELLER)
+        );
+
+        roleRepository.saveAll(roles);
+        log.info("Roles Saved in the DB...");
+
     }
 }
