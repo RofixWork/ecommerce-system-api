@@ -7,9 +7,7 @@ import com.rofix.ecommerce_system.dto.response.ProductImageResponseDTO;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.ProductImage;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
-import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.ProductImageRepository;
-import com.rofix.ecommerce_system.repository.ProductRepository;
 import com.rofix.ecommerce_system.utils.EntityHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
