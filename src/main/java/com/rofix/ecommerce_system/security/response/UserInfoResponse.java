@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -15,9 +15,9 @@ public class UserInfoResponse {
     private String email;
     private String phone;
     private boolean enabled;
-    private List<String> roles;
+    private Set<String> roles;
 
-    public UserInfoResponse(Long id, String username, String email, String phone, List<String> roles) {
+    public UserInfoResponse(Long id, String username, String email, String phone, Set<String> roles) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -25,7 +25,7 @@ public class UserInfoResponse {
         this.roles = roles;
     }
 
-    public UserInfoResponse(Long id, String username, List<String> roles) {
+    public UserInfoResponse(Long id, String username, Set<String> roles) {
         this.id = id;
         this.roles = roles;
         this.username = username;

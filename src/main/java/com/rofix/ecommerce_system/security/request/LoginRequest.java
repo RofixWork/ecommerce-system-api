@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginRequest {
     @NotBlank(message = "Please provide username")
-    @Size(min = 2, max = 20, message = "username must be between 2 and 20 chars")
+    @Size(min = 3, max = 20, message = "username must be between 3 and 20 chars")
     private String username;
 
     @NotBlank(message = "Please provide password")

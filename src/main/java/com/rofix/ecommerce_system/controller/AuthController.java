@@ -1,6 +1,7 @@
 package com.rofix.ecommerce_system.controller;
 
 import com.rofix.ecommerce_system.response.APIResponse;
+import com.rofix.ecommerce_system.security.request.LoginRequest;
 import com.rofix.ecommerce_system.security.request.RegisterRequest;
 import com.rofix.ecommerce_system.security.response.UserInfoResponse;
 import com.rofix.ecommerce_system.service.AuthService;
@@ -20,7 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final AuthService authService;
 
-    @PostMapping("/register")
+    @PostMapping("/login")
+    public ResponseEntity<UserInfoResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
+    }
+
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<APIResponse> register(
             @Valid @RequestBody RegisterRequest registerRequest
     ) {

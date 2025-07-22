@@ -2,15 +2,29 @@ package com.rofix.ecommerce_system.service;
 
 import com.rofix.ecommerce_system.entity.Role;
 import com.rofix.ecommerce_system.entity.User;
-import com.rofix.ecommerce_system.enums.RoleName;
+import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
+import com.rofix.ecommerce_system.exception.base.UnauthorizedException;
 import com.rofix.ecommerce_system.repository.RoleRepository;
 import com.rofix.ecommerce_system.repository.UserRepository;
+import com.rofix.ecommerce_system.security.jwt.JwtUtils;
+import com.rofix.ecommerce_system.security.request.LoginRequest;
 import com.rofix.ecommerce_system.security.request.RegisterRequest;
+import com.rofix.ecommerce_system.security.response.UserInfoResponse;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +39,8 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
 
     @Override
     public String register(RegisterRequest registerRequest) {
@@ -35,6 +51,37 @@ public class AuthServiceImpl implements AuthService {
         savedUser(registerRequest, userRoles);
 
         return "User registration completed";
+    }
+
+    @Override
+    public ResponseEntity<UserInfoResponse> login(LoginRequest loginRequest) {
+        Authentication authentication;
+
+        try {
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        } catch (AuthenticationException ex) {
+            log.info("Invalid username or password", ex);
+            throw new UnauthorizedException("Invalid credentials");
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        User user = userRepository.findByUsernameIgnoreCase(userDetails.getUsername()).orElseThrow(() -> {
+            log.error("Username not found");
+            return new NotFoundException("Username not found");
+        });
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        UserInfoResponse userInfoResponse = modelMapper.map(userDetails, UserInfoResponse.class);
+        Set<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+        userInfoResponse.setRoles(roles);
+        userInfoResponse.setEmail(user.getEmail());
+        userInfoResponse.setPhone(user.getPhone());
+
+        ResponseCookie cookie = jwtUtils.generateJwtCookie(userDetails);
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(userInfoResponse);
     }
 
     //    ---------------------------HELPERS------------------------------

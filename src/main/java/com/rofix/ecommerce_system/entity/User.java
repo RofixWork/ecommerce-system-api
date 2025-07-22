@@ -38,7 +38,7 @@ public class User extends BaseEntity {
     private Boolean enabled;
 
     @ManyToMany(
-            fetch = FetchType.LAZY,
+            fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE}
     )
     @JoinTable(
