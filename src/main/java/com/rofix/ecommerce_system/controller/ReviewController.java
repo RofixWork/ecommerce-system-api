@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(value = "/api/products", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
@@ -19,13 +21,18 @@ import org.springframework.web.bind.annotation.*;
 public class ReviewController {
     private final ReviewService reviewService;
 
+    @GetMapping("/{productId}/reviews")
+    public ResponseEntity<List<ReviewResponseDTO>> getProductReviews(
+            @Min(value = 1) @PathVariable Long productId
+    ) {
+        return ResponseEntity.ok(reviewService.getProductReviews(productId));
+    }
+
     @PostMapping("/{productId}/reviews")
     public ResponseEntity<ReviewResponseDTO> createReview(
             @Min(value = 1) @PathVariable Long productId,
             @Valid @RequestBody ReviewRequestDTO reviewRequestDTO
     ) {
-        ReviewResponseDTO reviewResponseDTO = reviewService.createReview(productId, reviewRequestDTO);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(reviewResponseDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewService.createReview(productId, reviewRequestDTO));
     }
 }

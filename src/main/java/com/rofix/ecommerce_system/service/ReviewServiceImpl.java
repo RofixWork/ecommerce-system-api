@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -30,5 +33,17 @@ public class ReviewServiceImpl implements ReviewService {
                 savedReview = reviewRepository.save(review);
         log.info("Review created: {}", savedReview);
         return modelMapper.map(savedReview, ReviewResponseDTO.class);
+    }
+
+    @Override
+    public List<ReviewResponseDTO> getProductReviews(Long productId) {
+        Product product = entityHelper.getProductOrThrow(productId);
+        List<Review> reviews = reviewRepository.findByProductOrderByCreatedAtDesc(product);
+
+        log.info("Fetching reviews for product {}", product.getName());
+
+        return reviews.stream()
+                .map(review -> modelMapper.map(review, ReviewResponseDTO.class))
+                .collect(Collectors.toList());
     }
 }
