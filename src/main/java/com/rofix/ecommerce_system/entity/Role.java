@@ -3,10 +3,14 @@ package com.rofix.ecommerce_system.entity;
 import com.rofix.ecommerce_system.entity.base.BaseEntity;
 import com.rofix.ecommerce_system.enums.RoleName;
 import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "roles")
 @Entity
+@Data
 @NoArgsConstructor
 public class Role extends BaseEntity {
     @Id
