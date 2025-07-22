@@ -13,6 +13,7 @@ import com.rofix.ecommerce_system.security.request.LoginRequest;
 import com.rofix.ecommerce_system.security.request.RegisterRequest;
 import com.rofix.ecommerce_system.security.response.UserInfoResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -42,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
 
+    @Transactional
     @Override
     public String register(RegisterRequest registerRequest) {
         existsConflict(registerRequest);
@@ -53,6 +55,7 @@ public class AuthServiceImpl implements AuthService {
         return "User registration completed";
     }
 
+    @Transactional
     @Override
     public ResponseEntity<UserInfoResponse> login(LoginRequest loginRequest) {
         Authentication authentication;
