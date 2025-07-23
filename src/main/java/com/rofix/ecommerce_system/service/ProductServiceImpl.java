@@ -6,10 +6,10 @@ import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.ProductImage;
-import com.rofix.ecommerce_system.entity.User;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
+import com.rofix.ecommerce_system.exception.base.UnauthorizedException;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
@@ -22,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -104,11 +103,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails) {
         productNameAlreadyExist(productRequestDTO.getName(), productId);
 
         Product product = entityHelper.getProductOrThrow(productId);
         Category category = entityHelper.getCategoryOrThrow(productRequestDTO.getCategoryId());
+
+        if (!product.getCreatedBy().getId().equals(userDetails.getId())) {
+            log.error("You are not authorized to modify this product.");
+            throw new UnauthorizedException("You are not authorized to modify this product.");
+        }
 
         //update
         product.setName(productRequestDTO.getName());

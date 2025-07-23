@@ -99,9 +99,10 @@ public class ProductController {
     @PutMapping(value = "/products/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProductResponseDTO> updateProduct(
             @PathVariable @Min(1) Long productId,
-            @Valid @RequestBody ProductRequestDTO productRequestDTO
+            @Valid @RequestBody ProductRequestDTO productRequestDTO,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return ResponseEntity.ok(productService.updateProduct(productId, productRequestDTO));
+        return ResponseEntity.ok(productService.updateProduct(productId, productRequestDTO, userDetails));
     }
 
     @Operation(summary = "Delete product by ID with all associated images")

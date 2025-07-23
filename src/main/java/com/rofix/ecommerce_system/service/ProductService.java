@@ -5,7 +5,6 @@ import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UserDetails;
 
 public interface ProductService {
     ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails);
@@ -16,7 +15,7 @@ public interface ProductService {
 
     PageListResponse<ProductResponseDTO> getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String search, String price);
 
-    ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO);
+    ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails);
 
     @Transactional
     String deleteProduct(Long productId);
