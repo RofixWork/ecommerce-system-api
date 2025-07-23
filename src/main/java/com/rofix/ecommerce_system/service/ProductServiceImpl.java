@@ -6,11 +6,13 @@ import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.ProductImage;
+import com.rofix.ecommerce_system.entity.User;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import com.rofix.ecommerce_system.response.PageListResponse;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.utils.EntityHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -38,13 +41,13 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageService productImageService;
 
     @Override
-    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails) {
 
         productNameAlreadyExist(productRequestDTO.getName(), null);
 
         Category category = entityHelper.getCategoryOrThrow(productRequestDTO.getCategoryId());
 
-        Product savedProduct = getSavedProduct(productRequestDTO, category);
+        Product savedProduct = getSavedProduct(productRequestDTO, userDetails, category);
 
         log.info("Creating product '{}' in category '{}'", savedProduct.getName(), category.getName());
 
@@ -141,12 +144,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     //------------------HELPERS---------------
-    private Product getSavedProduct(ProductRequestDTO productRequestDTO, Category category) {
+    private Product getSavedProduct(ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails, Category category) {
         Product product = new Product(
                 productRequestDTO.getName(),
                 productRequestDTO.getDescription(),
                 productRequestDTO.getPrice(),
                 productRequestDTO.getStock(),
+                userDetails.getUser(),
                 category
         );
 

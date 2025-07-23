@@ -1,5 +1,6 @@
 package com.rofix.ecommerce_system.dto.response;
 
+import com.rofix.ecommerce_system.security.response.UserInfoResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,4 +18,5 @@ public class ProductResponseDTO {
     private Integer stock;
     private CategoryResponseDTO category;
     private List<ProductImageResponseDTO> images;
+    private CreatedByResponseDTO createdBy;
 }

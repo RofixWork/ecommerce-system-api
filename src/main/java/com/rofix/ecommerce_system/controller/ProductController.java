@@ -5,6 +5,7 @@ import com.rofix.ecommerce_system.dto.request.ProductRequestDTO;
 import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.response.APIResponse;
 import com.rofix.ecommerce_system.response.PageListResponse;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,9 +36,10 @@ public class ProductController {
     @ApiResponse(responseCode = "201", description = "Product created successfully")
     @PostMapping(value = "/products", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ProductResponseDTO> createProduct(
-            @Valid @RequestBody ProductRequestDTO productRequestDTO
+            @Valid @RequestBody ProductRequestDTO productRequestDTO,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productRequestDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productRequestDTO, userDetails));
     }
 
     @Operation(summary = "Get all products with pagination, sorting and filtering")

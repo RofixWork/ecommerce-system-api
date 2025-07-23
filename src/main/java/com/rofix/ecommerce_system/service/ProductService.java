@@ -3,10 +3,12 @@ package com.rofix.ecommerce_system.service;
 import com.rofix.ecommerce_system.dto.request.ProductRequestDTO;
 import com.rofix.ecommerce_system.dto.response.ProductResponseDTO;
 import com.rofix.ecommerce_system.response.PageListResponse;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface ProductService {
-    ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO);
+    ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails);
 
     ProductResponseDTO getProduct(Long productId);
 
