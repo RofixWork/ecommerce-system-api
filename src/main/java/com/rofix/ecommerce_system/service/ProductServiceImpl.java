@@ -109,10 +109,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = entityHelper.getProductOrThrow(productId);
         Category category = entityHelper.getCategoryOrThrow(productRequestDTO.getCategoryId());
 
-        if (!product.getCreatedBy().getId().equals(userDetails.getId())) {
-            log.error("You are not authorized to modify this product.");
-            throw new UnauthorizedException("You are not authorized to modify this product.");
-        }
+        assertOwnership(userDetails, product);
 
         //update
         product.setName(productRequestDTO.getName());
@@ -128,8 +125,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Transactional
     @Override
-    public String deleteProduct(Long productId) {
+    public String deleteProduct(Long productId, UserDetailsImpl userDetails) {
         Product product = entityHelper.getProductOrThrow(productId);
+
+        assertOwnership(userDetails, product);
+
         List<ProductImage> productImages = product.getProductImages();
 
         //no images
@@ -233,5 +233,12 @@ public class ProductServiceImpl implements ProductService {
     private Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         return PageRequest.of(pageNumber - 1, pageSize, sort);
+    }
+
+    private static void assertOwnership(UserDetailsImpl userDetails, Product product) {
+        if (!product.getCreatedBy().getId().equals(userDetails.getId())) {
+            log.error("You are not authorized to modify this product.");
+            throw new UnauthorizedException("You are not authorized to modify this product.");
+        }
     }
 }

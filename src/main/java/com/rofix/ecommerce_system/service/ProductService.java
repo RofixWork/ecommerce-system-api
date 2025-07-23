@@ -18,5 +18,5 @@ public interface ProductService {
     ProductResponseDTO updateProduct(Long productId, ProductRequestDTO productRequestDTO, UserDetailsImpl userDetails);
 
     @Transactional
-    String deleteProduct(Long productId);
+    String deleteProduct(Long productId, UserDetailsImpl userDetails);
 }

@@ -112,8 +112,9 @@ public class ProductController {
     })
     @DeleteMapping("/products/{productId}")
     public ResponseEntity<APIResponse> deleteProduct(
-            @PathVariable @Min(1) Long productId
+            @PathVariable @Min(1) Long productId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        return ResponseEntity.ok(new APIResponse(productService.deleteProduct(productId), true));
+        return ResponseEntity.ok(new APIResponse(productService.deleteProduct(productId, userDetails), true));
     }
 }
