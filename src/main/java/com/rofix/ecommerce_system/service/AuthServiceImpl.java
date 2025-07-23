@@ -26,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -66,25 +67,20 @@ public class AuthServiceImpl implements AuthService {
             log.info("Invalid username or password", ex);
             throw new UnauthorizedException("Invalid credentials");
         }
-
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        User user = userRepository.findByUsernameIgnoreCase(userDetails.getUsername()).orElseThrow(() -> {
-            log.error("Username not found");
-            return new NotFoundException("Username not found");
-        });
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        UserInfoResponse userInfoResponse = modelMapper.map(userDetails, UserInfoResponse.class);
-        Set<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
-        userInfoResponse.setRoles(roles);
-        userInfoResponse.setEmail(user.getEmail());
-        userInfoResponse.setPhone(user.getPhone());
+        UserInfoResponse userInfoResponse = getUserInfoResponse(userDetails);
 
         ResponseCookie cookie = jwtUtils.generateJwtCookie(userDetails);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString()).body(userInfoResponse);
+    }
+
+
+    @Override
+    public UserInfoResponse showMe(UserDetails userDetails) {
+        return getUserInfoResponse(userDetails);
     }
 
     //    ---------------------------HELPERS------------------------------
@@ -122,5 +118,14 @@ public class AuthServiceImpl implements AuthService {
         if (userRepository.existsByPhoneIgnoreCase(req.getPhone())) {
             throw new ConflictException("Phone is already in use.");
         }
+    }
+
+    private UserInfoResponse getUserInfoResponse(UserDetails user) {
+        UserInfoResponse userInfoResponse = modelMapper.map(user, UserInfoResponse.class);
+        Set<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+        userInfoResponse.setRoles(roles);
+        return userInfoResponse;
     }
 }

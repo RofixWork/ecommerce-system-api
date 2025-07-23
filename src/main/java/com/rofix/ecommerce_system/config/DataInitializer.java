@@ -2,18 +2,18 @@ package com.rofix.ecommerce_system.config;
 
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Role;
+import com.rofix.ecommerce_system.entity.User;
 import com.rofix.ecommerce_system.enums.RoleName;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
 import com.rofix.ecommerce_system.repository.RoleRepository;
+import com.rofix.ecommerce_system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 @RequiredArgsConstructor
@@ -44,27 +44,41 @@ public class DataInitializer implements CommandLineRunner {
     ));
     private final CategoryRepository categoryRepository;
     private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
 
     @Override
     public void run(String... args) throws Exception {
+        // --- Save Categories ---
         List<Category> categories = new ArrayList<>();
         for (String category : ecommerceCategories) {
-            Category newCategory = new Category(category, "bla bla bla bla bla bla bla");
-            categories.add(newCategory);
+            categories.add(new Category(category, "bla bla bla"));
         }
         categoryRepository.saveAll(categories);
         log.info("Categories Saved in the DB...");
 
-//        --------------------------- roles ---------------------------
-        Set<Role> roles = Set.of(
+        // --- Save Roles ---
+        roleRepository.saveAll(Set.of(
                 new Role(RoleName.ADMIN),
                 new Role(RoleName.CUSTOMER),
                 new Role(RoleName.SELLER)
-        );
-
-        roleRepository.saveAll(roles);
+        ));
         log.info("Roles Saved in the DB...");
 
+        // --- Load the Admin Role from DB again (Managed) ---
+//        Role adminRole = roleRepository.findByRoleName("admin")
+//                .orElseThrow(() -> new RuntimeException("Role Not Found"));
+
+//        // --- Create Admin User ---
+//        User user = new User();
+//        user.setUsername("admin");
+//        user.setPhone("0678765654");
+//        user.setEmail("admin@gmail.com");
+//        user.setPassword(passwordEncoder.encode("admin"));
+//        user.getRoles().add(adminRole); // Now managed
+//        userRepository.save(user);
+//        log.info("Admin User Saved in the DB...");
     }
+
 }

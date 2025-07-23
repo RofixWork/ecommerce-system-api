@@ -5,6 +5,8 @@ import com.rofix.ecommerce_system.security.request.RegisterRequest;
 import com.rofix.ecommerce_system.security.response.UserInfoResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 
 public interface AuthService {
     @Transactional
@@ -12,4 +14,6 @@ public interface AuthService {
 
     @Transactional
     ResponseEntity<UserInfoResponse> login(LoginRequest loginRequest);
+
+    UserInfoResponse showMe(UserDetails userDetails);
 }

@@ -19,18 +19,22 @@ public class UserDetailsImpl implements UserDetails {
     private String username;
     @JsonIgnore
     private String password;
+    private String email;
+    private String phone;
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(Long id, String username, String password, String email, String phone, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.email = email;
+        this.phone = phone;
         this.authorities = authorities;
     }
 
     public static UserDetailsImpl build(User user) {
         var roles = user.getRoles().stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name())).toList();
-        return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), roles);
+        return new UserDetailsImpl(user.getId(), user.getUsername(), user.getPassword(), user.getEmail(), user.getPhone(), roles);
     }
 
     @Override
