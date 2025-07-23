@@ -237,8 +237,8 @@ public class ProductServiceImpl implements ProductService {
 
     private static void assertOwnership(UserDetailsImpl userDetails, Product product) {
         if (!product.getCreatedBy().getId().equals(userDetails.getId())) {
-            log.error("You are not authorized to modify this product.");
-            throw new UnauthorizedException("You are not authorized to modify this product.");
+            log.error("You don't have permission to perform this action.");
+            throw new UnauthorizedException("You don't have permission to perform this action.");
         }
     }
 }
