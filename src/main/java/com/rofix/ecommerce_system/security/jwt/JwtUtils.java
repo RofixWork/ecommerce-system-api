@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Component
+@Slf4j
 public class JwtUtils {
     private final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
@@ -62,7 +64,7 @@ public class JwtUtils {
     }
 
     public ResponseCookie getCleanJwtCookie() {
-        return ResponseCookie.from(jwtCookie, "")
+        return ResponseCookie.from(jwtCookie, null)
                 .path("/api")
                 .build();
     }
@@ -85,9 +87,9 @@ public class JwtUtils {
             Jwts.parser().verifyWith(key()).build().parseSignedClaims(token);
             return true;
         } catch (JwtException e) {
-            System.out.println("Invalid Token: " + e.getMessage());
+            log.info("Invalid Token: {}", e.getMessage());
         } catch (Exception e) {
-            System.out.println("validateJwtToken Exception: " + e.getMessage());
+            log.info("validateJwtToken Exception: {}", e.getMessage());
         }
 
         return false;
