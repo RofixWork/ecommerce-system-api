@@ -6,7 +6,6 @@ import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.Review;
 import com.rofix.ecommerce_system.entity.User;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
-import com.rofix.ecommerce_system.exception.base.CustomException;
 import com.rofix.ecommerce_system.repository.ReviewRepository;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.utils.EntityHelper;

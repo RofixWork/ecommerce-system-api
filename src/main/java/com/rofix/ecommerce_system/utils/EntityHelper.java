@@ -1,15 +1,22 @@
 package com.rofix.ecommerce_system.utils;
 
+import com.rofix.ecommerce_system.config.AppConstants;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.ProductImage;
+import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
 import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -44,5 +51,17 @@ public class EntityHelper {
             log.info("Product not found with id {}", productImageId);
             return new NotFoundException("Sorry, that Product Image doesn't exist.");
         });
+    }
+
+    public Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+        Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        return PageRequest.of(pageNumber - 1, pageSize, sort);
+    }
+
+    public void checkOrderField(String sortBy, Set<String> fields) {
+        if (!fields.contains(sortBy.trim().toLowerCase())) {
+            log.error("Invalid sort field entered. Here are the fields you can use: {}", fields);
+            throw new BadRequestException("Invalid sort field: '" + sortBy + "'. Allowed fields are: " + fields);
+        }
     }
 }
