@@ -66,8 +66,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public PageListResponse<ProductResponseDTO> getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder, String search, String price) {
 
-        checkProductOrderField(sortBy);
-        Pageable pageable = getPageable(pageNumber, pageSize, sortBy, sortOrder);
+        entityHelper.checkOrderField(sortBy, AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
+        Pageable pageable = entityHelper.getPageable(pageNumber, pageSize, sortBy, sortOrder);
 
         String cleanSearch = search != null ? search.trim() : null,
                 cleanPrice = price != null ? price.trim() : null;
@@ -222,19 +222,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("Invalid price format enter like (price=(eq|lt|gt|neq|lte|gte):price)");
         }
     }
-
-    private static void checkProductOrderField(String sortBy) {
-        if (!AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS.contains(sortBy.trim().toLowerCase())) {
-            log.error("Invalid sort field entered. Here are the fields you can use: {}", AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
-            throw new BadRequestException("Invalid sort field entered. Here are the fields you can use: " + AppConstants.ALLOWED_PRODUCT_ORDERING_FIELDS);
-        }
-    }
-
-    private Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
-        Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        return PageRequest.of(pageNumber - 1, pageSize, sort);
-    }
-
+    
     private static void assertOwnership(UserDetailsImpl userDetails, Product product) {
         if (!product.getCreatedBy().getId().equals(userDetails.getId())) {
             log.error("You don't have permission to perform this action.");

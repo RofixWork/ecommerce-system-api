@@ -1,14 +1,15 @@
 package com.rofix.ecommerce_system.utils;
 
-import com.rofix.ecommerce_system.config.AppConstants;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.ProductImage;
+import com.rofix.ecommerce_system.entity.User;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
 import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.repository.ProductRepository;
+import com.rofix.ecommerce_system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ public class EntityHelper {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final UserRepository userRepository;
 
     public Category getCategoryOrThrow(Long categoryId) {
         log.info("Getting category with id {}", categoryId);
@@ -50,6 +52,13 @@ public class EntityHelper {
         return productImageRepository.findById(productImageId).orElseThrow(() -> {
             log.info("Product not found with id {}", productImageId);
             return new NotFoundException("Sorry, that Product Image doesn't exist.");
+        });
+    }
+
+    public User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> {
+            log.info("Product not found with id {}", userId);
+            return new NotFoundException("Sorry, that User doesn't exist.");
         });
     }
 

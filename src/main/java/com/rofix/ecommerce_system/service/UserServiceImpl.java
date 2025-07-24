@@ -6,14 +6,13 @@ import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.repository.UserRepository;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.response.UserInfoResponse;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.utils.EntityHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,12 +35,7 @@ public class UserServiceImpl implements UserService {
         List<User> users = userPage.getContent();
 
         List<UserInfoResponse> userInfoResponseDTOS = users.stream()
-                .map(user -> {
-                    UserInfoResponse userInfoResponse = modelMapper.map(user, UserInfoResponse.class);
-                    Set<String> roles = user.getRoles().stream().map(role -> role.getName().name()).collect(Collectors.toSet());
-                    userInfoResponse.setRoles(roles);
-                    return userInfoResponse;
-                })
+                .map(this::getUserInfoResponse)
                 .toList();
 
         boolean isEmpty = userPage.isEmpty();
@@ -53,5 +47,36 @@ public class UserServiceImpl implements UserService {
                 isEmpty ? 0 : userPage.getTotalElements(),
                 userPage.isLast()
         );
+    }
+
+    @Override
+    public UserInfoResponse getUserBy(Long userId) {
+        User user = entityHelper.getUserOrThrow(userId);
+        return getUserInfoResponse(user);
+    }
+
+    @Override
+    public String deleteUserBy(Long userId, UserDetailsImpl userDetails) {
+        User user = entityHelper.getUserOrThrow(userId);
+
+        if (user.getId().equals(userDetails.getId())) {
+            log.warn("User ID: {} attempted to delete their own active account.", userDetails.getId());
+            throw new BadRequestException("Logged-in users cannot delete their own account.");
+        }
+
+        userRepository.delete(user);
+        log.info("User '{}' has been deleted successfully.", user.getUsername());
+        return "User '" + user.getUsername() + "' has been deleted successfully.";
+    }
+
+    //    ======================= HELPERS ========================
+    private UserInfoResponse getUserInfoResponse(User user) {
+        UserInfoResponse userInfoResponse = modelMapper.map(user, UserInfoResponse.class);
+        userInfoResponse.setRoles(getRoles(user));
+        return userInfoResponse;
+    }
+
+    private Set<String> getRoles(User user) {
+        return user.getRoles().stream().map(role -> role.getName().name()).collect(Collectors.toSet());
     }
 }
