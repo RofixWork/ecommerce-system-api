@@ -10,5 +10,5 @@ public interface UserService {
 
     UserInfoResponse getUserBy(Long userId);
 
-    String deleteUserBy(@Min(value = 1) Long userId, UserDetailsImpl userDetails);
+    String deleteUserBy(Long userId, UserDetailsImpl userDetails);
 }

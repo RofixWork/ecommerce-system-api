@@ -22,14 +22,13 @@ public class Cart extends BaseEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "cart")
     private List<CartItem> cartItems = new ArrayList<>();
 
-    public Cart(List<CartItem> cartItems, User user) {
-        this.cartItems = cartItems;
+    public Cart(User user) {
         this.user = user;
     }
 }

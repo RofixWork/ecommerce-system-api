@@ -1,0 +1,10 @@
+package com.rofix.ecommerce_system.service;
+
+import com.rofix.ecommerce_system.dto.request.CartRequestDTO;
+import com.rofix.ecommerce_system.dto.response.CartResponseDTO;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
+import jakarta.validation.Valid;
+
+public interface CartService {
+    CartResponseDTO addProductFromCart(@Valid CartRequestDTO cartRequestDTO, UserDetailsImpl userDetails);
+}

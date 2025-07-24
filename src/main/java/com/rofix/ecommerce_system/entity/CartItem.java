@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Check;
 
+import java.math.BigDecimal;
+
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "cartItems")
@@ -29,9 +31,18 @@ public class CartItem extends BaseEntity {
     @Column(nullable = false)
     private Integer quantity;
 
-    public CartItem(Product product, Cart cart, Integer quantity) {
-        this.product = product;
+    @Transient
+    public BigDecimal getItemTotal() {
+        if (product.getPrice() != null && quantity != null) {
+            return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+        }
+        return BigDecimal.ZERO;
+    }
+
+
+    public CartItem(Cart cart, Product product, Integer quantity) {
         this.cart = cart;
+        this.product = product;
         this.quantity = quantity;
     }
 }

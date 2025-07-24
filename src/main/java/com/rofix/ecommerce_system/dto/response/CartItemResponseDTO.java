@@ -8,14 +8,13 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class ProductResponseDTO {
+public class CartItemResponseDTO {
     private Long id;
     private String name;
     private String slug;
-    private String description;
     private BigDecimal price;
-    private Integer stock;
+    private Integer quantity;
+    private BigDecimal itemTotal;
     private CategoryResponseDTO category;
     private List<ProductImageResponseDTO> images;
-    private CreatedByResponseDTO createdBy;
 }
