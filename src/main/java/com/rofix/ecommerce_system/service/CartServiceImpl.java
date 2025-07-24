@@ -10,10 +10,13 @@ import com.rofix.ecommerce_system.entity.CartItem;
 import com.rofix.ecommerce_system.entity.Product;
 import com.rofix.ecommerce_system.entity.User;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
+import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.CartItemRepository;
 import com.rofix.ecommerce_system.repository.CartRepository;
+import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.utils.EntityHelper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +57,7 @@ public class CartServiceImpl implements CartService {
             cartItem.setQuantity(newTotalQuantity);
             cartItemRepository.save(cartItem);
             log.info("Cart item has been updated successfully");
-            return getCartResponseDTO(cart, product);
+            return getCartResponseDTO(cart);
         }
 
         //create cart Item
@@ -67,11 +70,17 @@ public class CartServiceImpl implements CartService {
         cart = cartRepository.save(cart);
         log.info("Added CartItem {} to Cart: {}", savedCartItem.getId(), cart.getId());
 
-        return getCartResponseDTO(cart, product);
+        return getCartResponseDTO(cart);
+    }
+
+    @Override
+    public CartResponseDTO getCartItems(UserDetailsImpl userDetails) {
+        Cart cart = getCartOrThrow(userDetails.getUser());
+        return getCartResponseDTO(cart);
     }
 
     //    ===================================== HELPERS =====================================
-    private CartResponseDTO getCartResponseDTO(Cart cart, Product product) {
+    private CartResponseDTO getCartResponseDTO(Cart cart) {
         CartResponseDTO cartResponseDTO = modelMapper.map(cart, CartResponseDTO.class);
         List<CartItemResponseDTO> cartItems = cart.getCartItems().stream()
                 .map(cartItem -> {
@@ -84,7 +93,7 @@ public class CartServiceImpl implements CartService {
                     cartItemResponseDTO.setQuantity(cartItem.getQuantity());
                     cartItemResponseDTO.setItemTotal(cartItem.getItemTotal());
 
-                    CategoryResponseDTO categoryResponseDTO = modelMapper.map(product.getCategory(), CategoryResponseDTO.class);
+                    CategoryResponseDTO categoryResponseDTO = modelMapper.map(cartItemProduct.getCategory(), CategoryResponseDTO.class);
                     List<ProductImageResponseDTO> productImageResponseDTO = cartItemProduct.getProductImages()
                             .stream().map(image -> modelMapper.map(image, ProductImageResponseDTO.class))
                             .toList();
@@ -104,6 +113,15 @@ public class CartServiceImpl implements CartService {
             Cart cart = new Cart(user);
             return cartRepository.save(cart);
         });
+    }
+
+    private Cart getCartOrThrow(User user) {
+        return cartRepository.findByUser(user).orElseThrow(
+                () -> {
+                    log.info("Cart with id {} not found", user.getId());
+                    return new NotFoundException("You dont have any Cart!!!");
+                }
+        );
     }
 
     private void isPurchasable(Integer quantity, Product product) {
