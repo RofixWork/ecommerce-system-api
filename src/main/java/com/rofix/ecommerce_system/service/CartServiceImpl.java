@@ -79,6 +79,25 @@ public class CartServiceImpl implements CartService {
         return getCartResponseDTO(cart);
     }
 
+    @Transactional
+    @Override
+    public String clearCart(UserDetailsImpl userDetails) {
+        Cart cart = getCartOrThrow(userDetails.getUser());
+
+        List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems == null || cartItems.isEmpty()) {
+            log.info("User cart is empty or not yet initialized.");
+            return "Your cart is currently empty. Start adding some products!";
+        }
+
+        for (CartItem cartItem : cartItems) {
+            cartItemRepository.deleteCartItemById(cartItem.getId());
+        }
+
+        log.info("Successfully cleared cart for User ID: {}. Deleted {} items.", userDetails.getId(), cartItems.size());
+        return "Cart items has been deleted successfully";
+    }
+
     //    ===================================== HELPERS =====================================
     private CartResponseDTO getCartResponseDTO(Cart cart) {
         CartResponseDTO cartResponseDTO = modelMapper.map(cart, CartResponseDTO.class);

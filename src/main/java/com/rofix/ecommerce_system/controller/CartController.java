@@ -3,6 +3,7 @@ package com.rofix.ecommerce_system.controller;
 import com.rofix.ecommerce_system.config.AppConstants;
 import com.rofix.ecommerce_system.dto.request.CartRequestDTO;
 import com.rofix.ecommerce_system.dto.response.CartResponseDTO;
+import com.rofix.ecommerce_system.response.APIResponse;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.service.CartService;
@@ -29,6 +30,11 @@ public class CartController {
         CartResponseDTO cartPageResponse = cartService.getCartItems(userDetails);
 
         return ResponseEntity.ok(cartPageResponse);
+    }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<APIResponse> clearCart(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(new APIResponse(cartService.clearCart(userDetails), true));
     }
 
     @PostMapping(value = "/add", consumes = MediaType.APPLICATION_JSON_VALUE)

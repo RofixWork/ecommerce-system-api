@@ -11,6 +11,8 @@ public interface CartService {
     @Transactional
     CartResponseDTO addProductFromCart(@Valid CartRequestDTO cartRequestDTO, UserDetailsImpl userDetails);
 
-
     CartResponseDTO getCartItems(UserDetailsImpl userDetails);
+
+    @Transactional
+    String clearCart(UserDetailsImpl userDetails);
 }
