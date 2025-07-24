@@ -14,6 +14,7 @@ import com.rofix.ecommerce_system.repository.CartItemRepository;
 import com.rofix.ecommerce_system.repository.CartRepository;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.utils.EntityHelper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -31,6 +32,7 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ModelMapper modelMapper;
 
+    @Transactional
     @Override
     public CartResponseDTO addProductFromCart(CartRequestDTO cartRequestDTO, UserDetailsImpl userDetails) {
 
