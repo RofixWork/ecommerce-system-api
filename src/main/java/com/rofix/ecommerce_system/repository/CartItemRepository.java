@@ -15,10 +15,15 @@ import java.util.Optional;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-    Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
+    Optional<CartItem> findByCartAndProduct_Id(Cart cart, Long productId);
 
     @Modifying
     @Transactional
     @Query("DELETE FROM CartItem as ci WHERE ci.cart = :cart")
     void deleteAllByCart(@Param("cart") Cart cart);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM CartItem as ci WHERE ci.cart.id = :cartId AND ci.product.id = :productId")
+    void deleteByCartAndProductId(@Param("cartId") Long cartId, @Param("productId") Long productId);
 }

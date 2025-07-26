@@ -37,6 +37,16 @@ public class CartController {
         return ResponseEntity.ok(new APIResponse(cartService.clearCart(userDetails), true));
     }
 
+    @DeleteMapping("/remove/{productId}")
+    public ResponseEntity<APIResponse> removeProductFromCart(
+            @Min(value = 1) @PathVariable Long productId,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        String st = cartService.deleteProductFromCart(productId, userDetails);
+
+        return ResponseEntity.ok(new APIResponse(st, true));
+    }
+
     @PostMapping(value = "/add", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<CartResponseDTO> addProductToCart(
             @Valid @RequestBody CartRequestDTO cartRequestDTO,
