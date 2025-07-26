@@ -89,10 +89,8 @@ public class CartServiceImpl implements CartService {
             log.info("User cart is empty or not yet initialized.");
             return "Your cart is currently empty. Start adding some products!";
         }
-
-        for (CartItem cartItem : cartItems) {
-            cartItemRepository.deleteCartItemById(cartItem.getId());
-        }
+        
+        cartItemRepository.deleteAllByCart(cart);
 
         log.info("Successfully cleared cart for User ID: {}. Deleted {} items.", userDetails.getId(), cartItems.size());
         return "Cart items has been deleted successfully";
