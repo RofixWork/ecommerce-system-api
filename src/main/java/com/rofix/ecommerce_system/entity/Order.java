@@ -36,6 +36,10 @@ public class Order extends BaseEntity {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false, name = "created_at")
+    private Instant createdAt;
+
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "order")
     List<OrderItem> orderItems = new ArrayList<>();
 
@@ -46,8 +50,7 @@ public class Order extends BaseEntity {
         }
     }
 
-    public Order(OrderStatus status, User user, BigDecimal totalPrice) {
-        this.status = status;
+    public Order(User user, BigDecimal totalPrice) {
         this.user = user;
         this.totalPrice = totalPrice;
     }
