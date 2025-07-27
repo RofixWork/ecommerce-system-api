@@ -1,6 +1,7 @@
 package com.rofix.ecommerce_system.controller;
 
 import com.rofix.ecommerce_system.config.AppConstants;
+import com.rofix.ecommerce_system.dto.request.OrderStatusUpdateRequestDTO;
 import com.rofix.ecommerce_system.dto.response.OrderResponseDTO;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
@@ -12,18 +13,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/orders", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 @Tag(name = "Orders", description = "APIs for managing orders: create, view, and list user orders")
+@Validated
 public class OrderController {
 
     private final OrderService orderService;
@@ -88,5 +92,16 @@ public class OrderController {
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
         return ResponseEntity.ok(orderService.getOrderDetails(orderId, userDetails));
+    }
+
+    @PatchMapping(value = "/{orderId}/status", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+            @Min(value = 1) @PathVariable Long orderId,
+            @Valid @RequestBody OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        OrderResponseDTO orderResponseDTO = orderService.updateOrderStatus(orderId, orderStatusUpdateRequestDTO, userDetails);
+
+        return ResponseEntity.ok(orderResponseDTO);
     }
 }

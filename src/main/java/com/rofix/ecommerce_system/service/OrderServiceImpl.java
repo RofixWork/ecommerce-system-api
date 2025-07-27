@@ -1,15 +1,17 @@
 package com.rofix.ecommerce_system.service;
 
 import com.rofix.ecommerce_system.config.AppConstants;
+import com.rofix.ecommerce_system.dto.request.OrderStatusUpdateRequestDTO;
 import com.rofix.ecommerce_system.dto.response.OrderResponseDTO;
 import com.rofix.ecommerce_system.entity.*;
+import com.rofix.ecommerce_system.enums.OrderStatus;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.repository.OrderRepository;
 import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
-import com.rofix.ecommerce_system.utils.CartHelper;
-import com.rofix.ecommerce_system.utils.EntityHelper;
-import com.rofix.ecommerce_system.utils.OrderHelper;
+import com.rofix.ecommerce_system.helpers.CartHelper;
+import com.rofix.ecommerce_system.helpers.EntityHelper;
+import com.rofix.ecommerce_system.helpers.OrderHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,5 +73,23 @@ public class OrderServiceImpl implements OrderService {
         List<OrderResponseDTO> orderResponseDTOS = orders.stream().map(orderHelper::getOrderResponseDTO).toList();
 
         return entityHelper.getPageListResponse(orderPage, orderResponseDTOS);
+    }
+
+    @Override
+    public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO, UserDetailsImpl userDetails) {
+        Order order = entityHelper.getOrderOrThrow(orderId, userDetails);
+
+        OrderStatus orderStatus;
+        try {
+            orderStatus = OrderStatus.valueOf(orderStatusUpdateRequestDTO.getStatus().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            log.warn(ex.getMessage());
+            throw new BadRequestException("Invalid order status. Allowed values are NEW, PAID, or SHIPPED.");
+        }
+
+        order.setStatus(orderStatus);
+        Order updateOrder = orderRepository.save(order);
+
+        return orderHelper.getOrderResponseDTO(updateOrder);
     }
 }

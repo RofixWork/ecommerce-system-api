@@ -1,4 +1,4 @@
-package com.rofix.ecommerce_system.utils;
+package com.rofix.ecommerce_system.helpers;
 
 import com.rofix.ecommerce_system.dto.response.CategoryResponseDTO;
 import com.rofix.ecommerce_system.dto.response.OrderItemResponseDTO;

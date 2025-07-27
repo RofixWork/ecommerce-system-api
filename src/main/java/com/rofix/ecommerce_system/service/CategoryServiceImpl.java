@@ -5,7 +5,7 @@ import com.rofix.ecommerce_system.dto.response.CategoryResponseDTO;
 import com.rofix.ecommerce_system.entity.Category;
 import com.rofix.ecommerce_system.exception.base.ConflictException;
 import com.rofix.ecommerce_system.repository.CategoryRepository;
-import com.rofix.ecommerce_system.utils.EntityHelper;
+import com.rofix.ecommerce_system.helpers.EntityHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

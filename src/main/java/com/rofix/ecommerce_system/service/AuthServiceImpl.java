@@ -7,7 +7,7 @@ import com.rofix.ecommerce_system.security.request.LoginRequest;
 import com.rofix.ecommerce_system.security.request.RegisterRequest;
 import com.rofix.ecommerce_system.security.response.UserInfoResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
-import com.rofix.ecommerce_system.utils.AuthHelper;
+import com.rofix.ecommerce_system.helpers.AuthHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
