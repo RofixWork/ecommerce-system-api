@@ -34,8 +34,7 @@ public class AuthController {
     })
     @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<APIResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
-        String status = authService.register(registerRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new APIResponse(status, true));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new APIResponse(authService.register(registerRequest), true));
     }
 
     @Operation(summary = "Login user", description = "Authenticate user and return JWT and user info")
@@ -55,8 +54,7 @@ public class AuthController {
     })
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> me(@AuthenticationPrincipal UserDetails userDetails) {
-        UserInfoResponse userInfoResponse = authService.showMe(userDetails);
-        return new ResponseEntity<>(userInfoResponse, HttpStatus.OK);
+        return new ResponseEntity<>(authService.showMe(userDetails), HttpStatus.OK);
     }
 
     @Operation(summary = "Logout user", description = "Logs out the user by clearing the JWT cookie")

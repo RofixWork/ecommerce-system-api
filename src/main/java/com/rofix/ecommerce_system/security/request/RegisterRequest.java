@@ -27,5 +27,5 @@ public class RegisterRequest {
     private String password;
 
     //    @NotEmpty(message = "At least one role must be selected.")
-    private Set<@Pattern(regexp = "(?i)^(CUSTOMER|SELLER)$", message = "Invalid role value. Allowed roles are CUSTOMER, SELLER.") String> roles;
+    private Set<@Pattern(regexp = "(?i)^(CUSTOMER|SELLER|ADMIN)$", message = "Invalid role value. Allowed roles are CUSTOMER, SELLER. ADMIN.") String> roles;
 }
