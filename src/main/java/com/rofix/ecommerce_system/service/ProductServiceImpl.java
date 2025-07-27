@@ -91,18 +91,7 @@ public class ProductServiceImpl implements ProductService {
                 .map(product -> modelMapper.map(product, ProductResponseDTO.class))
                 .toList();
 
-        if (productPage.isEmpty()) {
-            return new PageListResponse<>(List.of(), 0, 0, 0, 0L, true);
-        }
-
-        return new PageListResponse<>(
-                productResponseDTOS,
-                productPage.getSize(),
-                productPage.getNumber() + 1,
-                productPage.getTotalPages(),
-                productPage.getTotalElements(),
-                productPage.isLast()
-        );
+        return entityHelper.getPageListResponse(productPage, productResponseDTOS);
     }
 
     @Override

@@ -70,19 +70,6 @@ public class OrderServiceImpl implements OrderService {
         List<Order> orders = orderPage.getContent();
         List<OrderResponseDTO> orderResponseDTOS = orders.stream().map(orderHelper::getOrderResponseDTO).toList();
 
-        boolean isEmpty = orderPage.isEmpty();
-
-        if (isEmpty) {
-            return new PageListResponse<>(List.of(), 0, 0, 0, 0L, true);
-        }
-
-        return new PageListResponse<>(
-                orderResponseDTOS,
-                orderPage.getSize(),
-                orderPage.getNumber() + 1,
-                orderPage.getTotalPages(),
-                orderPage.getTotalElements(),
-                orderPage.isLast()
-        );
+        return entityHelper.getPageListResponse(orderPage, orderResponseDTOS);
     }
 }

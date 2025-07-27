@@ -37,21 +37,8 @@ public class UserServiceImpl implements UserService {
         List<UserInfoResponse> userInfoResponseDTOS = users.stream()
                 .map(this::getUserInfoResponse)
                 .toList();
-
-        boolean isEmpty = userPage.isEmpty();
-
-        if (isEmpty) {
-            return new PageListResponse<>(List.of(), 0, 0, 0, 0L, true);
-        }
         
-        return new PageListResponse<>(
-                userInfoResponseDTOS,
-                userPage.getSize(),
-                userPage.getNumber() + 1,
-                userPage.getTotalPages(),
-                userPage.getTotalElements(),
-                userPage.isLast()
-        );
+        return entityHelper.getPageListResponse(userPage, userInfoResponseDTOS);
     }
 
     @Override

@@ -4,14 +4,17 @@ import com.rofix.ecommerce_system.entity.*;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
 import com.rofix.ecommerce_system.repository.*;
+import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -69,6 +72,21 @@ public class EntityHelper {
     public Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         return PageRequest.of(pageNumber - 1, pageSize, sort);
+    }
+
+    public <U, T> PageListResponse<T> getPageListResponse(Page<U> page, List<T> content) {
+        if (page.isEmpty()) {
+            return new PageListResponse<T>(List.of(), 0, 0, 0, 0L, true);
+        }
+
+        return new PageListResponse<T>(
+                content,
+                page.getSize(),
+                page.getNumber() + 1,
+                page.getTotalPages(),
+                page.getTotalElements(),
+                page.isLast()
+        );
     }
 
     public void checkOrderField(String sortBy, Set<String> fields) {
