@@ -19,5 +19,5 @@ public class OrderResponseDTO {
     private OrderStatus orderStatus;
     private BigDecimal totalPrice;
     private Instant createdAt;
-    private List<OrderItemResponseDTO> orders;
+    private List<OrderItemResponseDTO> items;
 }

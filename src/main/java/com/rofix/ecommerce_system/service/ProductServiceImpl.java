@@ -91,13 +91,16 @@ public class ProductServiceImpl implements ProductService {
                 .map(product -> modelMapper.map(product, ProductResponseDTO.class))
                 .toList();
 
-        boolean isEmpty = productPage.isEmpty();
+        if (productPage.isEmpty()) {
+            return new PageListResponse<>(List.of(), 0, 0, 0, 0L, true);
+        }
+
         return new PageListResponse<>(
                 productResponseDTOS,
-                isEmpty ? 0 : productPage.getSize(),
-                isEmpty ? 0 : productPage.getNumber() + 1,
-                isEmpty ? 0 : productPage.getTotalPages(),
-                isEmpty ? 0 : productPage.getTotalElements(),
+                productPage.getSize(),
+                productPage.getNumber() + 1,
+                productPage.getTotalPages(),
+                productPage.getTotalElements(),
                 productPage.isLast()
         );
     }
@@ -222,7 +225,7 @@ public class ProductServiceImpl implements ProductService {
             throw new BadRequestException("Invalid price format enter like (price=(eq|lt|gt|neq|lte|gte):price)");
         }
     }
-    
+
     private static void assertOwnership(UserDetailsImpl userDetails, Product product) {
         if (!product.getCreatedBy().getId().equals(userDetails.getId())) {
             log.error("You don't have permission to perform this action.");

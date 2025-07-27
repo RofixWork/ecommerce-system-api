@@ -39,12 +39,17 @@ public class UserServiceImpl implements UserService {
                 .toList();
 
         boolean isEmpty = userPage.isEmpty();
+
+        if (isEmpty) {
+            return new PageListResponse<>(List.of(), 0, 0, 0, 0L, true);
+        }
+        
         return new PageListResponse<>(
                 userInfoResponseDTOS,
-                isEmpty ? 0 : userPage.getSize(),
-                isEmpty ? 0 : userPage.getNumber() + 1,
-                isEmpty ? 0 : userPage.getTotalPages(),
-                isEmpty ? 0 : userPage.getTotalElements(),
+                userPage.getSize(),
+                userPage.getNumber() + 1,
+                userPage.getTotalPages(),
+                userPage.getTotalElements(),
                 userPage.isLast()
         );
     }

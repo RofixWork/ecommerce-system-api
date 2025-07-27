@@ -24,24 +24,25 @@ public class OrderHelper {
     public OrderResponseDTO getOrderResponseDTO(Order newOrder) {
         OrderResponseDTO orderResponseDTO = modelMapper.map(newOrder, OrderResponseDTO.class);
         List<OrderItemResponseDTO> orderItemResponseDTOS = newOrder.getOrderItems().stream()
-                .map(orderItem -> {
-                    Product product = orderItem.getProduct();
-                    List<ProductImage> productImages = product.getProductImages();
-                    OrderItemResponseDTO orderItemResponseDTO = new OrderItemResponseDTO();
-                    orderItemResponseDTO.setId(orderItem.getId());
-                    orderItemResponseDTO.setName(product.getName());
-                    orderItemResponseDTO.setSlug(product.getSlug());
-                    orderItemResponseDTO.setQuantity(orderItem.getQuantity());
-                    orderItemResponseDTO.setPrice(product.getPrice());
-                    orderItemResponseDTO.setCategory(modelMapper.map(product.getCategory(), CategoryResponseDTO.class));
-
-                    List<ProductImageResponseDTO> productImageResponseDTOS = productImages.stream().map(image -> modelMapper.map(image, ProductImageResponseDTO.class)).toList();
-                    orderItemResponseDTO.setImages(productImageResponseDTOS);
-
-                    return orderItemResponseDTO;
-                }).toList();
-        orderResponseDTO.setOrders(orderItemResponseDTOS);
+                .map(this::getItemResponseDTO).toList();
+        orderResponseDTO.setItems(orderItemResponseDTOS);
         return orderResponseDTO;
+    }
+
+    public OrderItemResponseDTO getItemResponseDTO(OrderItem orderItem) {
+        Product product = orderItem.getProduct();
+        List<ProductImage> productImages = product.getProductImages();
+        OrderItemResponseDTO orderItemResponseDTO = new OrderItemResponseDTO();
+        orderItemResponseDTO.setId(orderItem.getId());
+        orderItemResponseDTO.setName(product.getName());
+        orderItemResponseDTO.setSlug(product.getSlug());
+        orderItemResponseDTO.setQuantity(orderItem.getQuantity());
+        orderItemResponseDTO.setPrice(product.getPrice());
+        orderItemResponseDTO.setCategory(modelMapper.map(product.getCategory(), CategoryResponseDTO.class));
+
+        List<ProductImageResponseDTO> productImageResponseDTOS = productImages.stream().map(image -> modelMapper.map(image, ProductImageResponseDTO.class)).toList();
+        orderItemResponseDTO.setImages(productImageResponseDTOS);
+        return orderItemResponseDTO;
     }
 
     public Order getOrder(User user, BigDecimal totalPrice, List<CartItem> cartItems) {

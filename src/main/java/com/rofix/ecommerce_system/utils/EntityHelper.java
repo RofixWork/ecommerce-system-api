@@ -1,15 +1,10 @@
 package com.rofix.ecommerce_system.utils;
 
-import com.rofix.ecommerce_system.entity.Category;
-import com.rofix.ecommerce_system.entity.Product;
-import com.rofix.ecommerce_system.entity.ProductImage;
-import com.rofix.ecommerce_system.entity.User;
+import com.rofix.ecommerce_system.entity.*;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.exception.base.NotFoundException;
-import com.rofix.ecommerce_system.repository.CategoryRepository;
-import com.rofix.ecommerce_system.repository.ProductImageRepository;
-import com.rofix.ecommerce_system.repository.ProductRepository;
-import com.rofix.ecommerce_system.repository.UserRepository;
+import com.rofix.ecommerce_system.repository.*;
+import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +22,7 @@ public class EntityHelper {
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
     public Category getCategoryOrThrow(Long categoryId) {
         log.info("Getting category with id {}", categoryId);
@@ -62,13 +58,21 @@ public class EntityHelper {
         });
     }
 
+    public Order getOrderOrThrow(Long orderId, UserDetailsImpl userDetails) {
+        User currentUser = userDetails.getUser();
+        return orderRepository.findByIdAndUser(orderId, currentUser).orElseThrow(() -> {
+            log.warn("Order with ID '{}' not found or not accessible for User ID: '{}'.", orderId, currentUser.getId());
+            return new NotFoundException("Sorry, the requested order was not found.");
+        });
+    }
+
     public Pageable getPageable(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         return PageRequest.of(pageNumber - 1, pageSize, sort);
     }
 
     public void checkOrderField(String sortBy, Set<String> fields) {
-        if (!fields.contains(sortBy.trim().toLowerCase())) {
+        if (!fields.contains(sortBy.trim())) {
             log.error("Invalid sort field entered. Here are the fields you can use: {}", fields);
             throw new BadRequestException("Invalid sort field: '" + sortBy + "'. Allowed fields are: " + fields);
         }
