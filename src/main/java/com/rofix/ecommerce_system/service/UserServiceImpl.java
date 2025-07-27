@@ -8,24 +8,23 @@ import com.rofix.ecommerce_system.response.PageListResponse;
 import com.rofix.ecommerce_system.security.response.UserInfoResponse;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.utils.EntityHelper;
+import com.rofix.ecommerce_system.utils.UserHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final EntityHelper entityHelper;
+    private final UserHelper userHelper;
 
     @Override
     public PageListResponse<UserInfoResponse> getAllUsers(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
@@ -35,16 +34,16 @@ public class UserServiceImpl implements UserService {
         List<User> users = userPage.getContent();
 
         List<UserInfoResponse> userInfoResponseDTOS = users.stream()
-                .map(this::getUserInfoResponse)
+                .map(userHelper::getUserInfoResponse)
                 .toList();
-        
+
         return entityHelper.getPageListResponse(userPage, userInfoResponseDTOS);
     }
 
     @Override
     public UserInfoResponse getUserBy(Long userId) {
         User user = entityHelper.getUserOrThrow(userId);
-        return getUserInfoResponse(user);
+        return userHelper.getUserInfoResponse(user);
     }
 
     @Override
@@ -59,16 +58,5 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
         log.info("User '{}' has been deleted successfully.", user.getUsername());
         return "User '" + user.getUsername() + "' has been deleted successfully.";
-    }
-
-    //    ======================= HELPERS ========================
-    private UserInfoResponse getUserInfoResponse(User user) {
-        UserInfoResponse userInfoResponse = modelMapper.map(user, UserInfoResponse.class);
-        userInfoResponse.setRoles(getRoles(user));
-        return userInfoResponse;
-    }
-
-    private Set<String> getRoles(User user) {
-        return user.getRoles().stream().map(role -> role.getName().name()).collect(Collectors.toSet());
     }
 }

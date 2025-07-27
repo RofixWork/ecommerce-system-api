@@ -9,6 +9,7 @@ import com.rofix.ecommerce_system.entity.ProductImage;
 import com.rofix.ecommerce_system.exception.base.BadRequestException;
 import com.rofix.ecommerce_system.repository.ProductImageRepository;
 import com.rofix.ecommerce_system.utils.EntityHelper;
+import com.rofix.ecommerce_system.utils.ProductImageHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,7 @@ public class ProductImageServiceImpl implements ProductImageService {
     private final Cloudinary cloudinary;
     private final ProductImageRepository productImageRepository;
     private final ModelMapper modelMapper;
+    private final ProductImageHelper productImageHelper;
 
     @Override
     public ProductImageResponseDTO uploadProductImage(Long productId, MultipartFile file) {
@@ -34,7 +36,7 @@ public class ProductImageServiceImpl implements ProductImageService {
             throw new BadRequestException("The uploaded file is empty");
         }
 
-        checkFileExtension(file);
+        productImageHelper.checkFileExtension(file);
 
         Product product = entityHelper.getProductOrThrow(productId);
         //upload
@@ -81,13 +83,4 @@ public class ProductImageServiceImpl implements ProductImageService {
         log.info("Product Image Deleted Successfully");
         return "Image for product " + product.getId() + " deleted successfully.";
     }
-
-    //    ================== HELPERS ==========================
-    private static void checkFileExtension(MultipartFile file) {
-        if (!file.isEmpty() && !AppConstants.ALLOWED_FILE_MIME_TYPES.contains(file.getContentType())) {
-            log.error("The uploaded file is not a valid image. Accepted types are: {}", AppConstants.ALLOWED_FILE_MIME_TYPES);
-            throw new BadRequestException("The uploaded file is not a valid image. Accepted types are: " + AppConstants.ALLOWED_FILE_MIME_TYPES);
-        }
-    }
-
 }

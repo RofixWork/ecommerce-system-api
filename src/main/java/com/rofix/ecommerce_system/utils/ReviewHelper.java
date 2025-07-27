@@ -1,28 +1,39 @@
 package com.rofix.ecommerce_system.utils;
 
+
+import com.rofix.ecommerce_system.dto.request.ReviewRequestDTO;
+import com.rofix.ecommerce_system.entity.Product;
+import com.rofix.ecommerce_system.entity.Review;
 import com.rofix.ecommerce_system.entity.User;
-import com.rofix.ecommerce_system.security.response.UserInfoResponse;
+import com.rofix.ecommerce_system.exception.base.ConflictException;
+import com.rofix.ecommerce_system.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class UserHelper {
+public class ReviewHelper {
     private final ModelMapper modelMapper;
+    private final ReviewRepository reviewRepository;
 
-    public UserInfoResponse getUserInfoResponse(User user) {
-        UserInfoResponse userInfoResponse = modelMapper.map(user, UserInfoResponse.class);
-        userInfoResponse.setRoles(getRoles(user));
-        return userInfoResponse;
+    public void hasReview(Product product, User user) {
+        if (reviewRepository.existsByProductAndUser(product, user)) {
+            log.warn("Attempt to create duplicate review for Product ID: {} by User ID: {}",
+                    product.getId(), user.getId());
+
+            throw new ConflictException("You have already submitted a review for this product.");
+        }
     }
 
-    public Set<String> getRoles(User user) {
-        return user.getRoles().stream().map(role -> role.getName().name()).collect(Collectors.toSet());
+    public Review getSavedReview(ReviewRequestDTO reviewRequestDTO, Product product, User user) {
+        Review review = modelMapper.map(reviewRequestDTO, Review.class);
+        review.setProduct(product);
+        review.setUser(user);
+        return reviewRepository.save(review);
     }
+
 }
