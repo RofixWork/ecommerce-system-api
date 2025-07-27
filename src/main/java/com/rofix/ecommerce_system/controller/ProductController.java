@@ -52,7 +52,7 @@ public class ProductController {
             @Parameter(description = "Page size (min = 1)") @Min(1) Integer pageSize,
 
             @RequestParam(name = "sortBy", defaultValue = AppConstants.SORT_BY)
-            @Parameter(description = "Field to sort by") String sortBy,
+            @Parameter(description = "Field to sort by (id, name, description, stock, price)") String sortBy,
 
             @RequestParam(name = "sortOrder", defaultValue = AppConstants.SORT_ORDER)
             @Parameter(description = "Sort direction (asc or desc)") String sortOrder,
@@ -61,7 +61,7 @@ public class ProductController {
             @Parameter(description = "Search keyword") String search,
 
             @RequestParam(name = "price", required = false)
-            @Parameter(description = "Price filter format: min-max") String price
+            @Parameter(description = "Price filter format: operator:value", example = "gte:100") String price
     ) {
         PageListResponse<ProductResponseDTO> pageListResponse = productService.getAllProducts(pageNumber, pageSize, sortBy, sortOrder, search, price);
         return ResponseEntity.ok(pageListResponse);
