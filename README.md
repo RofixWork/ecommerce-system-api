@@ -86,6 +86,14 @@ Pull or run the Docker image from Docker Hub:
 
 ---
 
+## 🧪 Postman Collection
+
+You can test all endpoints with this Postman collection:
+
+📁 Path: `postman_collections/Ecommer Management System.postman_collection.json`
+
+---
+
 ## ⚙️ Environment Variables
 
 ```env
