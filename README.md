@@ -79,6 +79,13 @@ ecommerce-system-api/
 
 ---
 
+## 🐳 Docker Image
+
+Pull or run the Docker image from Docker Hub:
+`abdessamadoughenja/ecommerce-system-api`
+
+---
+
 ## ⚙️ Environment Variables
 
 ```env
