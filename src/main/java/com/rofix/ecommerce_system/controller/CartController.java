@@ -15,13 +15,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/api/cart", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
-@Tag(name = "Cart Controller", description = "APIs for managing the shopping cart")
+@Tag(name = "Cart Controller", description = "APIs for managing the shopping cart, All endpoints require the CUSTOMER role.")
+@PreAuthorize("hasRole('CUSTOMER')")
 public class CartController {
     private final CartService cartService;
 

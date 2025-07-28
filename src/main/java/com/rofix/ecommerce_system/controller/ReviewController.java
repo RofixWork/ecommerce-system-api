@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ import java.util.List;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    @Operation(summary = "Get all reviews for a product", description = "Fetch all reviews associated with a specific product by its ID.")
+    @Operation(summary = "Get all reviews for a product", description = "Fetch all reviews associated with a specific product by its ID, Public access – anyone can view the product reviews")
     @GetMapping("/{productId}/reviews")
     public ResponseEntity<List<ReviewResponseDTO>> getProductReviews(
             @Min(value = 1) @PathVariable Long productId
@@ -38,8 +39,9 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getProductReviews(productId));
     }
 
-    @Operation(summary = "Create a new review for a product", description = "Submit a new review for a product identified by its ID.")
+    @Operation(summary = "Create a new review for a product", description = "Submit a new review for a product identified by its ID, require the CUSTOMER role.")
     @PostMapping(value = "/{productId}/reviews", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<ReviewResponseDTO> createReview(
             @Min(value = 1) @PathVariable Long productId,
             @Valid @RequestBody ReviewRequestDTO reviewRequestDTO,

@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
@@ -32,9 +33,10 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @Operation(summary = "Create new product")
+    @Operation(summary = "Create new product", description = "require the SELLER role.")
     @ApiResponse(responseCode = "201", description = "Product created successfully")
     @PostMapping(value = "/products", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ProductResponseDTO> createProduct(
             @Valid @RequestBody ProductRequestDTO productRequestDTO,
             @AuthenticationPrincipal UserDetailsImpl userDetails
@@ -42,7 +44,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productRequestDTO, userDetails));
     }
 
-    @Operation(summary = "Get all products with pagination, sorting and filtering")
+    @Operation(summary = "Get all products with pagination, sorting and filtering", description = "Public access – anyone can view the products")
     @GetMapping("/products")
     public ResponseEntity<PageListResponse<ProductResponseDTO>> getAllProducts(
             @RequestParam(name = "pageNumber", defaultValue = AppConstants.PAGE_NUMBER)
@@ -67,7 +69,7 @@ public class ProductController {
         return ResponseEntity.ok(pageListResponse);
     }
 
-    @Operation(summary = "Get product by ID")
+    @Operation(summary = "Get product by ID", description = "Public access – anyone can view the products")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product found"),
             @ApiResponse(responseCode = "404", description = "Product not found")
@@ -79,7 +81,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProduct(productId));
     }
 
-    @Operation(summary = "Get product by slug")
+    @Operation(summary = "Get product by slug", description = "Public access – anyone can view the products")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product found"),
             @ApiResponse(responseCode = "404", description = "Product not found")
@@ -91,12 +93,13 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductBySlug(slug));
     }
 
-    @Operation(summary = "Update product by ID")
+    @Operation(summary = "Update product by ID", description = "require the SELLER role.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product updated successfully"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @PutMapping(value = "/products/{productId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('SELLER')")
     public ResponseEntity<ProductResponseDTO> updateProduct(
             @PathVariable @Min(1) Long productId,
             @Valid @RequestBody ProductRequestDTO productRequestDTO,
@@ -105,12 +108,13 @@ public class ProductController {
         return ResponseEntity.ok(productService.updateProduct(productId, productRequestDTO, userDetails));
     }
 
-    @Operation(summary = "Delete product by ID with all associated images")
+    @Operation(summary = "Delete product by ID with all associated images", description = "require the SELLER or ADMIN role.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Product deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Product not found")
     })
     @DeleteMapping("/products/{productId}")
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ResponseEntity<APIResponse> deleteProduct(
             @PathVariable @Min(1) Long productId,
             @AuthenticationPrincipal UserDetailsImpl userDetails

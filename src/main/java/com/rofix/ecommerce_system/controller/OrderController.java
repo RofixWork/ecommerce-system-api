@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/api/orders", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
-@Tag(name = "Orders", description = "APIs for managing orders: create, view, and list user orders")
+@Tag(name = "Orders", description = "APIs for managing orders: create, view, and list user orders, All endpoints require the CUSTOMER role.")
 @Validated
+@PreAuthorize("hasRole('CUSTOMER')")
 public class OrderController {
 
     private final OrderService orderService;
@@ -94,14 +96,35 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderDetails(orderId, userDetails));
     }
 
+    @Operation(
+            summary = "Update order status",
+            description = "Update the status of an existing order (NEW, PAID, SHIPPED). Only accessible by the authenticated user who owns the order."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order status updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid order ID or status",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Order not found",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access",
+                    content = @Content(mediaType = "application/json"))
+    })
     @PatchMapping(value = "/{orderId}/status", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderResponseDTO> updateOrderStatus(
+            @Parameter(description = "ID of the order to be updated", example = "1")
             @Min(value = 1) @PathVariable Long orderId,
+
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Order status update payload",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = OrderStatusUpdateRequestDTO.class))
+            )
             @Valid @RequestBody OrderStatusUpdateRequestDTO orderStatusUpdateRequestDTO,
+
+            @Parameter(hidden = true)
             @AuthenticationPrincipal UserDetailsImpl userDetails
     ) {
-        OrderResponseDTO orderResponseDTO = orderService.updateOrderStatus(orderId, orderStatusUpdateRequestDTO, userDetails);
-
-        return ResponseEntity.ok(orderResponseDTO);
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, orderStatusUpdateRequestDTO, userDetails));
     }
 }
