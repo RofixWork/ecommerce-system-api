@@ -9,6 +9,7 @@ import com.rofix.ecommerce_system.repository.ReviewRepository;
 import com.rofix.ecommerce_system.security.service.UserDetailsImpl;
 import com.rofix.ecommerce_system.helpers.EntityHelper;
 import com.rofix.ecommerce_system.helpers.ReviewHelper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -38,6 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
         return modelMapper.map(savedReview, ReviewResponseDTO.class);
     }
 
+    @Transactional
     @Override
     public List<ReviewResponseDTO> getProductReviews(Long productId) {
         Product product = entityHelper.getProductOrThrow(productId);
